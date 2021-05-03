@@ -1,0 +1,20 @@
+{
+  "folders": [
+    {
+      "name": "root",
+      "path": "."
+    },
+    {
+      "name": "server",
+      "path": "server"
+    },
+    {
+      "name": "mobile",
+      "path": "mobile"
+    }
+  ],
+  "settings": {
+    "git.ignoreLimitWarning": true,
+    "editor.formatOnSave": true
+  }
+}
