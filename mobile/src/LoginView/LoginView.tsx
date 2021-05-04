@@ -1,5 +1,6 @@
+/* eslint-disable global-require */
 import React, { useState } from 'react';
-import { SafeAreaView, Text, View, Pressable, Modal } from 'react-native';
+import { SafeAreaView, View } from 'react-native';
 import { DivStyles } from './Stylesheets/Stylesheets';
 import {
   HeaderText,
@@ -50,11 +51,11 @@ const LoginView: React.FC = () => {
             />
           </InputContainer>
           <ButtonsContainer>
+            <CustomizedButton primary text="Login" onPress={handleLogin} />
             <CustomizedButton
               text="Need account?"
               onPress={() => setModalVisible(true)}
             />
-            <CustomizedButton primary text="Login" onPress={handleLogin} />
           </ButtonsContainer>
         </LoginViewContainer>
       </SafeAreaView>

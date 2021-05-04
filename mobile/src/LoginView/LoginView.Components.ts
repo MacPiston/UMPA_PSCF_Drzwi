@@ -20,7 +20,7 @@ export const HeaderText = styled(Text)`
 
 export const InputContainer = styled(View)`
   margin-top: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   flex: 2.2;
   display: flex;
   flex-direction: column;
@@ -35,7 +35,7 @@ export const StyledTextInput = styled(TextInput)`
   background-color: white;
   border: 1px solid lightgray;
   border-radius: 5px;
-  padding: 6px;
+  padding: 8px;
   width: 90%;
   height: 40%;
   font-size: 22px;
@@ -47,10 +47,10 @@ export const StyledImage = styled(Image)`
 `;
 
 export const ButtonsContainer = styled(View)`
-  flex: 1;
-  margin-bottom: 40px;
+  flex: 2;
+  width: 100%;
+  margin-bottom: 30px;
   display: flex;
-  flex-direction: row;
-  align-content: space-between;
+  flex-direction: column;
   /* border: 1px solid black; */
 `;
