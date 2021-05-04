@@ -1,16 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
-import { SafeAreaView } from 'react-native';
 import LoginView from './src/LoginView/LoginView';
 import DoorsView from './src/DoorsView/DoorsView';
 
 const App = () => {
-  return (
-    <SafeAreaView>
-      {/* Comment to disable */}
-      <DoorsView />
-      <LoginView />
-    </SafeAreaView>
-  );
+  return <LoginView />;
+  // return <DoorsView />;
 };
 
 export default App;
