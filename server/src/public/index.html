@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>WebScockets 101</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <link href="/server/src/public/styles.css" />
+</head>
+
+<body>
+    <h1>HELLO</h1>
+    <div id="chat">
+        <h2>Chat</h2>
+        <input id="login" type="text" placeholder="Login" />
+        <input id="password" type="text" placeholder="Password" />
+        <button id="send">Send</button>
+    </div>
+    <script>
+        var socket = io();
+
+        var login = document.getElementById('login');
+        var password = document.getElementById('password');
+
+        var button = document.getElementById('send');
+
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (password.value) {
+                socket.emit('authorization', { login: login.value, password: password.value });
+                login.value = '';
+                password.value = '';
+            }
+        });
+    </script>
+</body>
+
+</html>
