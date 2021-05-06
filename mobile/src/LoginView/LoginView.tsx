@@ -5,6 +5,7 @@ import {
   RefreshControl,
   KeyboardAvoidingView,
 } from 'react-native';
+import { BlurView } from '@react-native-community/blur';
 import { DivStyles } from './Stylesheets/Stylesheets';
 import {
   HeaderText,
@@ -15,26 +16,28 @@ import {
   ServerScrollView,
   SecondaryText,
 } from './LoginView.Components';
-import { BlurView } from '@react-native-community/blur';
 import AccountModal from './AccountModal';
 import CustomizedButton from './CustomizedButton';
 import ServerEntry from './ServerEntry';
 
 const LoginView: React.FC = () => {
   const { Background } = DivStyles;
+
   const [email, setEmail] = useState<string>('');
   const [pwd, setPwd] = useState<string>('');
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [typingAllowed, setTypingAllowed] = useState<boolean>(true);
+  const [uiActive, setUIactive] = useState<boolean>(true);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     console.log(email);
+    setUIactive(false);
+    await setTimeout(() => setUIactive(true), 1500);
   };
 
   const handleRefresh = async () => {
-    setTypingAllowed(false);
-    await setTimeout(() => setTypingAllowed(true), 1500);
+    setRefreshing(true);
+    await setTimeout(() => setRefreshing(false), 1500);
   };
 
   return (
@@ -72,7 +75,7 @@ const LoginView: React.FC = () => {
               keyboardType="email-address"
               placeholder="Email address..."
               onChange={setEmail}
-              editable={typingAllowed}
+              editable={uiActive && !refreshing}
             />
             <StyledTextInput
               autoCompleteType="password"
@@ -81,12 +84,17 @@ const LoginView: React.FC = () => {
               secureTextEntry
               placeholder="Password..."
               onChange={setPwd}
-              editable={typingAllowed}
+              editable={uiActive && !refreshing}
             />
           </InputContainer>
 
           <ButtonsContainer>
-            <CustomizedButton primary text="Login" onPress={handleLogin} />
+            <CustomizedButton
+              isLoading={refreshing || !uiActive}
+              isPrimary
+              text="Login"
+              onPress={handleLogin}
+            />
             <CustomizedButton
               text="Need account?"
               onPress={() => setModalVisible(true)}

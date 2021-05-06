@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Text, View, Modal } from 'react-native';
+import React from 'react';
+import { Text, View, Modal, Button } from 'react-native';
 
 interface ModalProps {
   visible: boolean;
@@ -17,7 +17,7 @@ const AccountModal: React.FC<ModalProps> = ({
   >
     <View
       style={{
-        flex: 1,
+        height: '20%',
         backgroundColor: 'white',
         marginHorizontal: 30,
         marginVertical: 320,
@@ -25,7 +25,7 @@ const AccountModal: React.FC<ModalProps> = ({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'space-evenly',
         shadowColor: '#000',
         shadowOffset: {
           width: 0,
@@ -35,9 +35,12 @@ const AccountModal: React.FC<ModalProps> = ({
         shadowRadius: 4,
         elevation: 5,
       }}
-      onTouchStart={handleClose}
     >
-      <Text>Nie dostaniesz konta i chuj</Text>
+      <Text style={{ fontSize: 18 }}>
+        Aby otrzymać swoje dane logowania do systemu skontaktuj się z
+        administratorem.
+      </Text>
+      <Button onPress={handleClose} title="Ok" />
     </View>
   </Modal>
 );

@@ -23,28 +23,29 @@ const TextContainer = styled(View)`
   flex: 5;
   display: flex;
   flex-direction: column;
-  border: 1px solid black;
+  /* border: 1px solid black; */
 `;
 
 const PrimaryText = styled(Text)`
   flex: 2;
   font-size: 28px;
   font-weight: 600;
-  border: 1px solid black;
+  /* border: 1px solid black; */
   padding-top: 6px;
 `;
 
 const SecondaryText = styled(Text)`
   flex: 1;
   font-size: 21px;
-  border: 1px solid black;
+  padding-bottom: 12px;
+  /* border: 1px solid black; */
 `;
 
 const StyledIcon = styled(Icon)`
   flex: 1;
   height: 100%;
   font-size: 42px;
-  border: 1px solid black;
+  /* border: 1px solid black; */
   align-self: center;
 `;
 
