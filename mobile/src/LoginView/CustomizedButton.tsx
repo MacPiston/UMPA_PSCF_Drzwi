@@ -17,7 +17,11 @@ const CustomizedButton: React.FC<ButtonProps> = ({
       style={{ flex: 1, justifyContent: 'space-around', alignItems: 'center' }}
       onPress={onPress}
     >
-      <Text style={primary ? { fontSize: 34 } : { fontSize: 20 }}>{text}</Text>
+      <Text
+        style={primary ? { fontSize: 36, fontWeight: '600' } : { fontSize: 20 }}
+      >
+        {text}
+      </Text>
     </Pressable>
   );
 };

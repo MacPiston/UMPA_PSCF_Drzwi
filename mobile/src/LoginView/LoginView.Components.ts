@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import { Text, View, TextInput, Image } from 'react-native';
+import { Text, View, TextInput, Image, ScrollView } from 'react-native';
 import styled from 'styled-components';
 
 export const LoginViewContainer = styled(View)`
@@ -18,6 +18,18 @@ export const HeaderText = styled(Text)`
   /* border: 1px solid black; */
 `;
 
+export const SecondaryText = styled(Text)`
+  font-size: 24px;
+  font-weight: 500;
+`;
+
+export const ServerScrollView = styled(ScrollView)`
+  flex: 6;
+  width: 90%;
+  border: 1px solid black;
+  border-radius: 5px;
+`;
+
 export const InputContainer = styled(View)`
   margin-top: 20px;
   margin-bottom: 10px;
@@ -32,18 +44,13 @@ export const InputContainer = styled(View)`
 `;
 
 export const StyledTextInput = styled(TextInput)`
-  background-color: white;
-  border: 1px solid lightgray;
   border-radius: 5px;
   padding: 8px;
   width: 90%;
   height: 40%;
   font-size: 22px;
-`;
-
-export const StyledImage = styled(Image)`
-  flex: 6;
-  aspect-ratio: 1;
+  background-color: ${(props) => (props.editable ? 'white' : 'lightgrey')};
+  border: 1px solid lightgray;
 `;
 
 export const ButtonsContainer = styled(View)`
