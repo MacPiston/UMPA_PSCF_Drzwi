@@ -5,6 +5,7 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 var mysql = require('mysql');
+
 var connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -12,16 +13,14 @@ var connection = mysql.createConnection({
     database: "door_access"
 });
 
-connection.connect(function (err) {
+//connection.connect(function (err) {
+//  if (err) throw err;
+connection.query("SELECT * from users", function (err, results, fields) {
     if (err) throw err;
-    connection.query("SELECT * from users", function (error, results, fields) {
-        if (err) throw err;
-        console.log(results);
-        connection.end();
-    });
+    console.log(results);
+    //connection.end();
 });
-
-
+//});
 
 
 app.get('/', (req, res) => {
@@ -38,4 +37,17 @@ io.on('connection', (socket) => {
     socket.on('authorization', (data) => {
         console.log('authorization');
     });
+
+    socket.on("addUser", (data) => {
+        var addQuery = 'insert ignore into users (email, password) values ("' + data.email + '", "' + data.password + '");';
+        // connection.connect(function (err) {
+        //   if (err) throw err;
+        connection.query(addQuery, function (err, results, fields) {
+            if (err) throw err;
+            console.log("Added user:" + data.email + " with password:" + data.password);
+            connection.end();
+        });
+        //});
+    });
 });
+

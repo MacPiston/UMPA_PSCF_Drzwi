@@ -16,6 +16,13 @@
         <input id="password" type="text" placeholder="Password" />
         <button id="send">Send</button>
     </div>
+    <h1>Panel admina</h1>
+    <div id="newuser">
+        <h2>Dodawanie nowego użytkownika</h2>
+        <input id="email-new-user" type="text" placeholder="Email" />
+        <input id="password-new-user" type="password" placeholder="Password" />
+        <button id="add-user">Add new user</button>
+    </div>
     <script>
         var socket = io();
 
@@ -23,6 +30,19 @@
         var password = document.getElementById('password');
 
         var button = document.getElementById('send');
+
+        var addUserButton = document.getElementById('add-user');
+
+        addUserButton.addEventListener('click', function (e) {
+            var email = document.getElementById("email-new-user");
+            var pass = document.getElementById("password-new-user");
+            if (email.value && pass.value) {
+                console.log("wysylanko");
+                socket.emit("addUser", { email: email.value, password: pass.value });
+                email.value = '';
+                pass.value = '';
+            }
+        });
 
         button.addEventListener('click', function (e) {
             e.preventDefault();
