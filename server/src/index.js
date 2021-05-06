@@ -45,9 +45,16 @@ io.on('connection', (socket) => {
         connection.query(addQuery, function (err, results, fields) {
             if (err) throw err;
             console.log("Added user:" + data.email + " with password:" + data.password);
-            connection.end();
         });
         //});
+    });
+
+    socket.on('deleteUser', (data) => {
+        var deleteQuery = 'DELETE from users where email = "' + data.email + '";';
+        connection.query(deleteQuery, function (err, results, fields) {
+            if (err) throw err;
+            console.log("Deleted user:" + data.email);
+        });
     });
 });
 
