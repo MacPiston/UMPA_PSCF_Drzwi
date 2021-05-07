@@ -37,11 +37,7 @@ io.on('connection', (socket) => {
 
     socket.on('loginRequest', (data) => {
         console.log("Login user email=" + data.email + " with password=" + data.password);
-
         var loginQuery = 'SELECT * from door_access.users WHERE email = "' + data.email + '" AND password = "' + data.password + '"';
-
-        console.log(loginQuery);
-
         connection.query(loginQuery, function (error, result, field) {
             if (error) throw error;
             if (result.length > 0) {
@@ -50,8 +46,8 @@ io.on('connection', (socket) => {
             }
             else {
                 console.log("Login not succes");
+                socket.emit('loginRequest', ("false"));
             }
-
         });
     });
 
