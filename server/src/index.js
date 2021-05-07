@@ -17,7 +17,7 @@ connection.connect(function (err) {
     connection.query("SELECT * from users", function (error, results, fields) {
         if (err) throw err;
         console.log(results);
-        connection.end();
+        //connection.end();
     });
 });
 
@@ -35,7 +35,24 @@ server.listen(3000, () => {
 io.on('connection', (socket) => {
     console.log('connected');
 
-    socket.on('authorization', (data) => {
-        console.log('authorization');
+    socket.on('loginRequest', (data) => {
+        console.log("Login user email=" + data.email + " with password=" + data.password);
+
+        var loginQuery = 'SELECT * from door_access.users WHERE email = "' + data.email + '" AND password = "' + data.password + '"';
+
+        console.log(loginQuery);
+
+        connection.query(loginQuery, function (error, result, field) {
+            if (error) throw error;
+            if (result.length > 0) {
+                console.log("Login succes");
+                socket.emit('loginRequest', ("true"));
+            }
+            else {
+                console.log("Login not succes");
+            }
+
+        });
     });
+
 });
