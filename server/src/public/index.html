@@ -63,7 +63,7 @@
         button.addEventListener('click', function (e) {
             e.preventDefault();
             if (password.value) {
-                socket.emit('authorization', { login: login.value, password: password.value });
+                socket.emit('loginRequest', { email: login.value, password: password.value });
                 login.value = '';
                 password.value = '';
             }
