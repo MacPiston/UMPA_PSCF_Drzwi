@@ -17,7 +17,6 @@ connection.connect(function (err) {
     connection.query("SELECT * from users", function (error, results, fields) {
         if (err) throw err;
         console.log(results);
-        //connection.end();
     });
 });
 
@@ -51,4 +50,22 @@ io.on('connection', (socket) => {
         });
     });
 
+    socket.on("addUser", (data) => {
+        var addQuery = 'insert ignore into users (email, password) values ("' + data.email + '", "' + data.password + '");';
+        // connection.connect(function (err) {
+        //   if (err) throw err;
+        connection.query(addQuery, function (err, results, fields) {
+            if (err) throw err;
+            console.log("Added user:" + data.email + " with password:" + data.password);
+        });
+        //});
+    });
+
+    socket.on('deleteUser', (data) => {
+        var deleteQuery = 'DELETE from users where email = "' + data.email + '";';
+        connection.query(deleteQuery, function (err, results, fields) {
+            if (err) throw err;
+            console.log("Deleted user:" + data.email);
+        });
+    });
 });

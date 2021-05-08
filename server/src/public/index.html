@@ -16,6 +16,18 @@
         <input id="password" type="text" placeholder="Password" />
         <button id="send">Send</button>
     </div>
+    <h1>Panel admina</h1>
+    <div id="newuser">
+        <h2>Dodawanie nowego użytkownika</h2>
+        <input id="email-new-user" type="text" placeholder="Email" />
+        <input id="password-new-user" type="password" placeholder="Password" />
+        <button id="add-user">Add new user</button>
+    </div>
+    <div id="deleteuser">
+        <h2>Usuwanie istniejącego użytkownika</h2>
+        <input id="email-old-user" type="text" placeholder="Email" />
+        <button id="delete-user">Delete user</button>
+    </div>
     <script>
         var socket = io();
 
@@ -23,6 +35,30 @@
         var password = document.getElementById('password');
 
         var button = document.getElementById('send');
+
+        var addUserButton = document.getElementById('add-user');
+
+        var deleteUserButton = document.getElementById('delete-user');
+
+        addUserButton.addEventListener('click', function (e) {
+            var email = document.getElementById("email-new-user");
+            var pass = document.getElementById("password-new-user");
+            if (email.value && pass.value) {
+                console.log("wysylanko");
+                socket.emit("addUser", { email: email.value, password: pass.value });
+                email.value = '';
+                pass.value = '';
+            }
+        });
+
+        deleteUserButton.addEventListener('click', function (e) {
+            var email = document.getElementById("email-old-user");
+            if (email.value) {
+                console.log("wysylanko");
+                socket.emit("deleteUser", { email: email.value });
+                email.value = '';
+            }
+        });
 
         button.addEventListener('click', function (e) {
             e.preventDefault();
