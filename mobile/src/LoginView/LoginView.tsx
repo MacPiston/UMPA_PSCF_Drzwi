@@ -35,10 +35,30 @@ const LoginView: React.FC = () => {
   const [selectedServerIP, setSelectedServerIP] = useState<string>('');
 
   const virtualServers = [
-    { ip: '192.168.50.1', name: 'testowy 1', key: 1 },
-    { ip: '255.255.255.0', name: 'testowy 2', key: 2 },
-    { ip: '127.0.0.1', name: 'testowy 3', key: 3 },
-    { ip: '123.123.123.123', name: 'testowy 4', key: 4 },
+    {
+      ip: '192.168.50.1',
+      name: 'testowy 1',
+      key: 1,
+      status: connectionStates.none,
+    },
+    {
+      ip: '255.255.255.0',
+      name: 'testowy 2',
+      key: 2,
+      status: connectionStates.inRange,
+    },
+    {
+      ip: '127.0.0.1',
+      name: 'testowy 3',
+      key: 3,
+      status: connectionStates.connected,
+    },
+    {
+      ip: '123.123.123.123',
+      name: 'testowy 4',
+      key: 4,
+      status: connectionStates.connecting,
+    },
   ];
 
   const handleRefresh = async () => {
@@ -54,8 +74,8 @@ const LoginView: React.FC = () => {
 
   const handleConnection = async (ip: string = selectedServerIP) => {
     const address = 'https://'.concat(ip);
-    const tempsocket = io(address);
-    setSocket(tempsocket);
+    // const tempsocket = io(address);
+    // setSocket(tempsocket);
   };
 
   const handleLogin = async () => {
@@ -94,6 +114,7 @@ const LoginView: React.FC = () => {
                   ip={element.ip}
                   isSelected={element.ip === selectedServerIP}
                   onPress={() => handleServerSelection(element.ip)}
+                  connectionStatus={element.status}
                 />
               );
             })}

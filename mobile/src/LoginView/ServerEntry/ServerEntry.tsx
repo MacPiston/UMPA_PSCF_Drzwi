@@ -40,10 +40,11 @@ export const ServerEntry: React.FC<EntryProps> = ({
       case connectionStates.connecting:
         return <ActivityIndicator size="large" color={Colors.Accent} />;
       case connectionStates.connected:
-        return <RangeIcon name="wifi" color={Colors.Green} />;
+        return <RangeIcon name="check" color={Colors.Green} />;
       default:
     }
   };
+
   return (
     <EntryContainer onTouchStart={onPress}>
       <CheckIcon
@@ -58,7 +59,11 @@ export const ServerEntry: React.FC<EntryProps> = ({
         </SecondaryText>
       </TextContainer>
       <View
-        style={{ flex: 1, alignContent: 'center', justifyContent: 'center' }}
+        style={{
+          flex: 1,
+          alignContent: 'center',
+          justifyContent: 'center',
+        }}
       >
         {switchIcon()}
       </View>
