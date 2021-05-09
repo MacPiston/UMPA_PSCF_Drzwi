@@ -9,23 +9,25 @@ const socket = io.connect("http://localhost:4000", {
     upgrade: false
 });
 
-socket.on('deleteUserRes', function (data) {
-    if (data.error=="true") {
-        deleteUser(data.email)
-        alert('Podano następujący email: ' + data.email + ' \n \n Usuwanie zakończyło się sukcesem');
-    } else {
-        alert('Podano następujący email: ' + data.email + ' \n \n Usuwanie zakończyło się niepowodzeniem');
-    }
-});
-
-socket.on('addUserRes', function (data) {
-    if (data.error === "true") {
-        alert('Podano następujący email: ' + data.email +' haslo: '+ data.password + '\n \n Dodanie zakończyło się sukcesem');
-        addUser(data.email,data.password);
-    } else {
-        alert('Podano następujący email: ' + data.email +' haslo: '+ data.password + '\n \n Dodanie zakonczyło się niepowodzeniem');
-    }
-});
+    socket.on('deleteUserRes', function (data) {
+        if (data.error=="true") {
+            alert('Podano następujący email: ' + data.email + ' \n \n Usuwanie zakończyło się sukcesem');
+            //deleteUser(data.email);
+            Main.deleting(data.email);
+        } else {
+            alert('Podano następujący email: ' + data.email + ' \n \n Usuwanie zakończyło się niepowodzeniem');
+        }
+    });
+    
+    socket.on('addUserRes', function (data) {
+        if (data.error === "true") {
+            alert('Podano następujący email: ' + data.email +' haslo: '+ data.password + '\n \n Dodanie zakończyło się sukcesem');
+            //addUser(data.email,data.password);
+            Main.adding(data.email,data.password);
+        } else {
+            alert('Podano następujący email: ' + data.email +' haslo: '+ data.password + '\n \n Dodanie zakonczyło się niepowodzeniem');
+        }
+    });
 
 class User {
     constructor(email, pass) {
@@ -67,25 +69,6 @@ function UserTable(props) {
     );
 }
 
-function addUser(email, password) {
-    var newUser = new User(email, password);
-    users.push(newUser);
-
-}
-
-function deleteUser(email) {
-    var index;
-    for (let i = 0; i < users.length; i++) {
-        if (users[i].email == email) {
-            index = i;
-            break;
-        }
-    }
-    if (index > -1) {
-        users.splice(index, 1);
-    }
-}
-
 export default function Main() {
     pullUsers();
     let emailInputDelete = React.createRef();
@@ -93,13 +76,38 @@ export default function Main() {
     let emailInputAdd = React.createRef();
     let passwordInputAdd = React.createRef();
 
+    function addUser(email, password) {
+        var newUser = new User(email, password);
+        users.push(newUser);
+        refresh();
+    }
+
+
+    
+    function deleteUser(email) {
+        var index;
+        for (let i = 0; i < users.length; i++) {
+            if (users[i].email == email) {
+                index = i;
+                break;
+            }
+        }
+        if (index > -1) {
+            users.splice(index, 1);
+            refresh();
+        }
+    }
+
+    Main.adding = addUser;
+    Main.deleting = deleteUser;
+
     function handleSubmitAdd(event) {
         event.preventDefault();
         event.stopPropagation();
         socket.emit("addUser", {email: emailInputAdd.current.value, password: passwordInputAdd.current.value});
         emailInputAdd.current.value = '';
         passwordInputAdd.current.value = '';
-        refresh();
+        
     }
 
     function handleSubmitDelete(event) {
@@ -107,7 +115,7 @@ export default function Main() {
         event.stopPropagation();
         socket.emit("deleteUser", {email: emailInputDelete.current.value});
         emailInputDelete.current.value = '';
-        refresh();
+        
     }
     return (
         <div className={styles.container}>
