@@ -10,12 +10,14 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
+    "@react-native-community/blur": "^3.6.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-import-resolver-typescript": "^2.4.0",
     "eslint-plugin-json": "^2.1.2",
     "eslint-plugin-prettier": "^3.1.2",
     "react": "17.0.1",
     "react-native": "0.64.0",
+    "react-native-vector-icons": "^8.1.0",
     "socket.io-client": "^4.0.1",
     "styled-components": "^5.2.3"
   },
@@ -25,6 +27,7 @@
     "@react-native-community/eslint-config": "^2.0.0",
     "@types/jest": "^26.0.20",
     "@types/react-native": "^0.64.0",
+    "@types/react-native-vector-icons": "^6.4.6",
     "@types/react-test-renderer": "^16.9.2",
     "@types/styled-components": "^5.1.9",
     "@typescript-eslint/eslint-plugin": "^3.10.1",
