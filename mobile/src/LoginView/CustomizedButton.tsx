@@ -1,11 +1,11 @@
 import React from 'react';
 import { Text, Pressable, ActivityIndicator } from 'react-native';
-import { Styles } from './Stylesheets/Stylesheets';
 import { Shadows, Colors } from './Stylesheets/Stylesheets';
 
 interface ButtonProps {
   isPrimary?: boolean;
-  isLoading?: boolean;
+  disabled?: boolean;
+  loading?: boolean;
   text: string;
   onPress: () => void;
 }
@@ -14,15 +14,16 @@ const CustomizedButton: React.FC<ButtonProps> = ({
   isPrimary = false,
   text,
   onPress,
-  isLoading = false,
+  disabled = false,
+  loading = false,
 }: ButtonProps) => {
   return (
     <Pressable
       style={{ flex: 1, justifyContent: 'space-around', alignItems: 'center' }}
       onPress={onPress}
-      disabled={isLoading}
+      disabled={disabled}
     >
-      {!isLoading && (
+      {!loading && (
         <Text
           style={
             isPrimary
@@ -33,7 +34,7 @@ const CustomizedButton: React.FC<ButtonProps> = ({
           {text}
         </Text>
       )}
-      {isLoading && <ActivityIndicator size="large" color={Colors.Accent} />}
+      {loading && <ActivityIndicator size="large" color={Colors.Accent} />}
     </Pressable>
   );
 };

@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 import styled from 'styled-components';
 import Icon from 'react-native-vector-icons/AntDesign';
-import { Shadows, Colors } from './Stylesheets/Stylesheets';
+import { Shadows, Colors } from '../Stylesheets/Stylesheets';
 
 export const EntryContainer = styled(View)`
   margin-top: -0.5px;

@@ -2,7 +2,7 @@
 import styled from 'styled-components';
 import { View } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
-import { Colors } from './Stylesheets/Stylesheets';
+import { Colors } from '../Stylesheets/Stylesheets';
 
 export const ViewContainerVertical = styled(View)`
   display: flex;

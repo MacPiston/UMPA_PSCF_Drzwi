@@ -19,17 +19,18 @@ import {
 } from './LoginView.Components';
 import AccountModal from './AccountModal';
 import CustomizedButton from './CustomizedButton';
-import ServerEntry from './ServerEntry';
-import ManualIP from './ManualIP';
-import { DefaultEventsMap } from 'socket.io-client/build/typed-events';
+import ServerEntry from './ServerEntry/ServerEntry';
+import ManualIP from './ManualIP/ManualIP';
 
 const LoginView: React.FC = () => {
   const { Background } = Styles;
   const [email, setEmail] = useState<string>('');
   const [pwd, setPwd] = useState<string>('');
+
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [uiActive, setUIactive] = useState<boolean>(true);
+  const [loginEnabled, setLoginEnabled] = useState<boolean>(false);
+
   const [socket, setSocket] = useState<Socket>();
   const [selectedServerIP, setSelectedServerIP] = useState<string>('');
 
@@ -40,14 +41,15 @@ const LoginView: React.FC = () => {
     { ip: '123.123.123.123', name: 'testowy 4', key: 4 },
   ];
 
-  const handleLogin = async () => {
-    setUIactive(false);
-    await setTimeout(() => setUIactive(true), 1500);
-  };
-
   const handleRefresh = async () => {
     setRefreshing(true);
     await setTimeout(() => setRefreshing(false), 1500);
+  };
+
+  const handleServerSelection = (ip: string) => {
+    setSelectedServerIP(ip);
+    setLoginEnabled(true);
+    // handleConnection(ip);
   };
 
   const handleConnection = async (ip: string = selectedServerIP) => {
@@ -56,10 +58,7 @@ const LoginView: React.FC = () => {
     setSocket(tempsocket);
   };
 
-  const handleServerSelection = (ip: string) => {
-    setSelectedServerIP(ip);
-    // handleConnection(ip);
-  };
+  const handleLogin = async () => {};
 
   return (
     <KeyboardAvoidingView behavior="position" style={Background}>
@@ -104,7 +103,7 @@ const LoginView: React.FC = () => {
               keyboardType="email-address"
               placeholder="Email address..."
               onChangeText={setEmail}
-              editable={uiActive && !refreshing}
+              editable={loginEnabled && !refreshing}
             />
             <StyledTextInput
               autoCompleteType="password"
@@ -112,16 +111,17 @@ const LoginView: React.FC = () => {
               secureTextEntry
               placeholder="Password..."
               onChangeText={setPwd}
-              editable={uiActive && !refreshing}
+              editable={loginEnabled && !refreshing}
             />
           </InputContainer>
 
           <ButtonsContainer>
             <CustomizedButton
-              isLoading={refreshing || !uiActive}
+              disabled={refreshing || !loginEnabled}
+              loading={refreshing}
               isPrimary
               text="Login"
-              onPress={handleLogin}
+              onPress={() => handleLogin()}
             />
             <CustomizedButton
               text="Need account?"

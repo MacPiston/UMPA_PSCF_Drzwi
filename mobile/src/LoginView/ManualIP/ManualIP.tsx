@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SecondaryText, StyledTextInput } from './LoginView.Components';
+import { SecondaryText, StyledTextInput } from '../LoginView.Components';
 import {
   ViewContainerVertical,
   InputContainerHorizontal,

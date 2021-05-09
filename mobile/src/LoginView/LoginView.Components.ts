@@ -71,7 +71,7 @@ export const ButtonsContainer = styled(View)`
 `;
 
 export const StyledBlurView = styled(BlurView)`
-  position: 'absolute';
+  position: absolute;
   top: 0;
   left: 0;
   bottom: 0;

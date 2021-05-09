@@ -7,7 +7,7 @@ import {
   RangeIcon,
   CheckIcon,
 } from './ServerEntry.Components';
-import { Colors } from './Stylesheets/Stylesheets';
+import { Colors } from '../Stylesheets/Stylesheets';
 
 interface EntryProps {
   ip: string;
