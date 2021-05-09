@@ -4,10 +4,27 @@ import styles from '../styles/User.module.css'
 import { useState } from 'react'
 const io = require("socket.io-client");
 
+
+//var users = [new User("test@gmail.com", "12345678"), new User("test@gmail.com", "12345678"),
+//new User("xd@lol.com", "123"), new User("asdlasdo@sfsl.com", "12asdad3")];
+
+var users = [];
+
 const socket = io.connect("http://localhost:4000", {
     transports: ['websocket'],
     upgrade: false
 });
+
+    socket.on('users', function(data) {
+        console.log("Got users");
+        console.log(data);
+        for(const user of data) {
+            users.push(new User(user.email, user.password));
+        }
+        console.log(users);
+        Main.adding('', '');
+        Main.deleting('');
+    });
 
     socket.on('deleteUserRes', function (data) {
         if (data.error=="true") {
@@ -36,13 +53,6 @@ class User {
     }
 }
 
-function pullUsers() {
-//i no nothing john snow
-}
-
-var users = [new User("test@gmail.com", "12345678"), new User("test@gmail.com", "12345678"),
-new User("xd@lol.com", "123"), new User("asdlasdo@sfsl.com", "12asdad3")];
-
 function userForceUpdate() {
     const [value, setValue] = useState(0);
     return () => setValue(value => value + 1);
@@ -70,7 +80,6 @@ function UserTable(props) {
 }
 
 export default function Main() {
-    pullUsers();
     let emailInputDelete = React.createRef();
     const refresh = userForceUpdate();
     let emailInputAdd = React.createRef();
