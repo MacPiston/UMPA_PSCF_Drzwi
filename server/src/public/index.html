@@ -66,6 +66,9 @@
                 socket.emit('loginRequest', { email: login.value, password: password.value });
                 login.value = '';
                 password.value = '';
+                socket.on('deleteUserRes', function (data) {
+                    alert(data);
+                });
             }
         });
     </script>

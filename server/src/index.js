@@ -63,13 +63,13 @@ io.on('connection', (socket) => {
         var addQuery = 'insert ignore into users (email, password) values ("' + data.email + '", "' + data.password + '");';
         connection.query(addQuery, function (err, result, fields) {
             if (err){
-                console.log("Added user:" + data.email + " with password:" + data.password+" : failed");
-                socket.emit('addUserRes', ("false"));
+                console.log("Added user:" + data.email + " with password: " + data.password+" : failed");
+                socket.emit('addUserRes', ({email: data.email, error: "false",password : data.password}));
                 throw err;
             }
             else{
-                console.log("Added user:" + data.email + " with password:" + data.password+" : success");
-                socket.emit('addUserRes', ("true"));
+                console.log("Added user:" + data.email + " with password: " + data.password+" : success");
+                socket.emit('addUserRes', ({email: data.email, error: "true",password : data.password}));
             }
         });
     });
@@ -81,12 +81,12 @@ io.on('connection', (socket) => {
         connection.query(deleteQuery, function (err, result, fields) {
             if (err){
                 console.log("Deleted user:" + data.email+" : failed");
-                socket.emit('deleteUserRes', ("false"));
+                socket.emit('deleteUserRes', {email: data.email, error: "false"});
                 throw err;
             }
             else{
                 console.log("Deleted user:" + data.email+" : success");
-                socket.emit('deleteUserRes', ("true"));
+                socket.emit('deleteUserRes', {email: data.email, error: "true"});
             }
         });
     });

@@ -5,13 +5,27 @@ import { useState } from 'react'
 const io = require("socket.io-client");
 
 const socket = io.connect("http://localhost:4000", {
-    withCredentials: true,
-    forceNew: true,
-    reconnectionAttempts: "Infinity", //avoid having user reconnect manually in order to prevent dead clients after a server restart
-    timeout: 10000, //before connect_error and connect_timeout are emitted.
-    transports: ['websocket']
+    transports: ['websocket'],
+    upgrade: false
 });
 
+socket.on('deleteUserRes', function (data) {
+    if (data.error=="true") {
+        deleteUser(data.email)
+        alert('Podano następujący email: ' + data.email + ' \n \n Usuwanie zakończyło się sukcesem');
+    } else {
+        alert('Podano następujący email: ' + data.email + ' \n \n Usuwanie zakończyło się niepowodzeniem');
+    }
+});
+
+socket.on('addUserRes', function (data) {
+    if (data.error === "true") {
+        alert('Podano następujący email: ' + data.email +' haslo: '+ data.password + '\n \n Dodanie zakończyło się sukcesem');
+        addUser(data.email,data.password);
+    } else {
+        alert('Podano następujący email: ' + data.email +' haslo: '+ data.password + '\n \n Dodanie zakonczyło się niepowodzeniem');
+    }
+});
 
 class User {
     constructor(email, pass) {
@@ -54,43 +68,23 @@ function UserTable(props) {
 }
 
 function addUser(email, password) {
-    socket.emit("addUser", {email: email, password: password});
-    socket.on('addUserRes', function (data) {
-        if (data === "true") {
-            alert('Podano następujący email: ' + email +' haslo: '+ password + '\n \n Dodanie zakończyło się sukcesem');
-            var newUser = new User(email, password);
-            users.push(newUser);
-        } else {
-            alert('Podano następujący email: ' + email +' haslo: '+ password + '\n \n Dodanie zakonczyło się niepowodzeniem');
-        }
-    });
+    var newUser = new User(email, password);
+    users.push(newUser);
 
 }
 
 function deleteUser(email) {
-    socket.emit("deleteUser", {email: email});
-
-    socket.on('deleteUserRes', function (data) {
-        if (data === "true") {
-
-            alert('Podano następujący email: ' + email + ' \n \n Usuwanie zakończyło się sukcesem');
-            var index;
-            for (let i = 0; i < users.length; i++) {
-                if (users[i].email == email) {
-                    index = i;
-                    break;
-                }
-            }
-            if (index > -1) {
-                users.splice(index, 1);
-            }
-        } else {
-            alert('Podano następujący email: ' + email + ' \n \n Usuwanie zakończyło się niepowodzeniem');
+    var index;
+    for (let i = 0; i < users.length; i++) {
+        if (users[i].email == email) {
+            index = i;
+            break;
         }
-    });
+    }
+    if (index > -1) {
+        users.splice(index, 1);
+    }
 }
-
-
 
 export default function Main() {
     pullUsers();
@@ -101,7 +95,8 @@ export default function Main() {
 
     function handleSubmitAdd(event) {
         event.preventDefault();
-        addUser(emailInputAdd.current.value, passwordInputAdd.current.value);
+        event.stopPropagation();
+        socket.emit("addUser", {email: emailInputAdd.current.value, password: passwordInputAdd.current.value});
         emailInputAdd.current.value = '';
         passwordInputAdd.current.value = '';
         refresh();
@@ -109,7 +104,8 @@ export default function Main() {
 
     function handleSubmitDelete(event) {
         event.preventDefault();
-        deleteUser(emailInputDelete.current.value);
+        event.stopPropagation();
+        socket.emit("deleteUser", {email: emailInputDelete.current.value});
         emailInputDelete.current.value = '';
         refresh();
     }
