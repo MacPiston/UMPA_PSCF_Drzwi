@@ -73,9 +73,9 @@ const LoginView: React.FC = () => {
   };
 
   const handleConnection = async (ip: string = selectedServerIP) => {
-    const address = 'https://'.concat(ip);
-    // const tempsocket = io(address);
-    // setSocket(tempsocket);
+    const address = 'http://'.concat(ip).concat(':4000');
+    const tempsocket = io(address, { transports: ['websocket'] });
+    setSocket(tempsocket);
   };
 
   const handleLogin = async () => {
@@ -106,18 +106,22 @@ const LoginView: React.FC = () => {
             >
               Select a server to log into:
             </SecondaryText>
-            {virtualServers.map((element) => {
-              return (
-                <ServerEntry
-                  key={element.key}
-                  description={element.name}
-                  ip={element.ip}
-                  isSelected={element.ip === selectedServerIP}
-                  onPress={() => handleServerSelection(element.ip)}
-                  connectionStatus={element.status}
-                />
-              );
-            })}
+            {virtualServers
+              .sort((a, b) => {
+                return b.status - a.status;
+              })
+              .map((element) => {
+                return (
+                  <ServerEntry
+                    key={element.key}
+                    description={element.name}
+                    ip={element.ip}
+                    isSelected={element.ip === selectedServerIP}
+                    onPress={() => handleServerSelection(element.ip)}
+                    connectionStatus={element.status}
+                  />
+                );
+              })}
             <ManualIP connectionHandler={handleConnection} />
           </ServerScrollView>
 
