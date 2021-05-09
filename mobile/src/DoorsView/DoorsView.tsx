@@ -7,74 +7,8 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import { Colors } from '../AppGlobalStyles/GlobalStylesheets';
 import { styles } from './Stylesheets/Stylesheets';
-
-const ExpandableItem = ({ item, onPressFunction }) => {
-  //Custom Component for the Expandable List
-  const [layoutHeight, setLayoutHeight] = useState(0);
-
-  useEffect(() => {
-    if (item.isExpanded) {
-      setLayoutHeight(null);
-    } else {
-      setLayoutHeight(0);
-    }
-  }, [item.isExpanded]);
-
-  return (
-    <View>
-      {/*Header of the Expandable List Item*/}
-      <TouchableOpacity
-        activeOpacity={1}
-        onPress={onPressFunction}
-        style={styles.item}
-      >
-        <Text style={styles.tileText}>{item.room_name}</Text>
-      </TouchableOpacity>
-      <View
-        style={{
-          height: layoutHeight,
-          overflow: 'hidden',
-        }}
-      >
-        {/*Content under the header of the Expandable List Item*/}
-        {item.subcategory.map((item, key) => (
-          <TouchableOpacity
-            key={key}
-            style={styles.content}
-            onPress={() => alert('Otwarto drzwi ' + item)}
-          >
-            <Text style={styles.openButton}>Otwórz drzwi</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
-  );
-};
-
-const DATA = [
-  {
-    isExpanded: false,
-    room_name: '101',
-    subcategory: [{ id: 1, val: 'Sub Cat 1' }],
-  },
-  {
-    isExpanded: false,
-    room_name: '102',
-    subcategory: [{ id: 1, val: 'Sub Cat 1' }],
-  },
-  {
-    isExpanded: false,
-    room_name: '103',
-    subcategory: [{ id: 1, val: 'Sub Cat 1' }],
-  },
-  {
-    isExpanded: false,
-    room_name: '201',
-    subcategory: [{ id: 1, val: 'Sub Cat 1' }],
-  },
-];
+import ExpandableItem from './ExpandableItem';
 
 const DoorsView = () => {
   const [listDataSource, setListDataSource] = useState(DATA);
@@ -93,24 +27,86 @@ const DoorsView = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{ flex: 1 }}>
-        <View style={{ backgroundColor: Colors.BlueAccent, flex: 0.1 }}>
-          <Text style={styles.header}>Dostępne drzwi</Text>
-        </View>
-        <ScrollView>
-          {listDataSource.map((item, key) => (
-            <ExpandableItem
-              key={item.room_name}
-              onPressFunction={() => {
-                updateLayout(key);
-              }}
-              item={item}
-            />
-          ))}
-        </ScrollView>
+      <View>
+        <Text style={styles.header}>Dostępne drzwi</Text>
       </View>
+      <ScrollView
+        style={{
+          flex: 1,
+          flexGrow: 1,
+        }}
+      >
+        {listDataSource.map((item, key) => (
+          <ExpandableItem
+            key={item.room_name}
+            onPressFunction={() => {
+              updateLayout(key);
+            }}
+            item={item}
+          />
+        ))}
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 export default DoorsView;
+
+const DATA = [
+  {
+    isExpanded: false,
+    room_name: '101',
+  },
+  {
+    isExpanded: false,
+    room_name: '102',
+  },
+  {
+    isExpanded: false,
+    room_name: '103',
+  },
+  {
+    isExpanded: false,
+    room_name: '201',
+  },
+  {
+    isExpanded: false,
+    room_name: '202',
+  },
+  {
+    isExpanded: false,
+    room_name: '203',
+  },
+  {
+    isExpanded: false,
+    room_name: '204',
+  },
+  {
+    isExpanded: false,
+    room_name: '301',
+  },
+  {
+    isExpanded: false,
+    room_name: '302',
+  },
+  {
+    isExpanded: false,
+    room_name: '303',
+  },
+  {
+    isExpanded: false,
+    room_name: 'Serwerownia',
+  },
+  {
+    isExpanded: false,
+    room_name: 'Gabinet Prezesa',
+  },
+  {
+    isExpanded: false,
+    room_name: 'Pomieszczenie gospodarcze 111',
+  },
+  {
+    isExpanded: false,
+    room_name: 'Pomieszczenie gospodarcze 311',
+  },
+];

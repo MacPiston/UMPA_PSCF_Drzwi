@@ -4,8 +4,8 @@ import LoginView from './src/LoginView/LoginView';
 import DoorsView from './src/DoorsView/DoorsView';
 
 const App = () => {
-  return <LoginView />;
-  // return <DoorsView />;
+  //return <LoginView />;
+  return <DoorsView />;
 };
 
 export default App;

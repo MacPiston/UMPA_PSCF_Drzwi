@@ -24,7 +24,6 @@ export const styles = StyleSheet.create({
     backgroundColor: Colors.LightBackground,
   },
   header: {
-    flex: 1,
     flexGrow: 1,
     fontSize: 38,
     backgroundColor: Colors.BlueAccent,
