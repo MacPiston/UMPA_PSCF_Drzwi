@@ -2,12 +2,26 @@ import Head from 'next/head'
 import React from 'react'
 import styles from '../styles/User.module.css'
 import { useState } from 'react'
+const io = require("socket.io-client");
+
+const socket = io.connect("http://localhost:4000", {
+    withCredentials: true,
+    forceNew: true,
+    reconnectionAttempts: "Infinity", //avoid having user reconnect manually in order to prevent dead clients after a server restart
+    timeout: 10000, //before connect_error and connect_timeout are emitted.
+    transports: ['websocket']
+});
+
 
 class User {
     constructor(email, pass) {
         this.email = email;
         this.password = pass;
     }
+}
+
+function pullUsers() {
+//i no nothing john snow
 }
 
 var users = [new User("test@gmail.com", "12345678"), new User("test@gmail.com", "12345678"),
@@ -40,35 +54,52 @@ function UserTable(props) {
 }
 
 function addUser(email, password) {
-    var newUser = new User(email, password);
-    users.push(newUser);
+    socket.emit("addUser", {email: email, password: password});
+    socket.on('addUserRes', function (data) {
+        if (data === "true") {
+            alert('Podano następujący email: ' + email +' haslo: '+ password + '\n \n Dodanie zakończyło się sukcesem');
+            var newUser = new User(email, password);
+            users.push(newUser);
+        } else {
+            alert('Podano następujący email: ' + email +' haslo: '+ password + '\n \n Dodanie zakonczyło się niepowodzeniem');
+        }
+    });
+
 }
 
 function deleteUser(email) {
-    var index;
-    for (let i = 0; i < users.length; i++) {
-        if (users[i].email == email) {
-            index = i;
-            break;
-        }
-    }
+    socket.emit("deleteUser", {email: email});
 
-    if (index > -1) {
-        users.splice(index, 1);
-    }
+    socket.on('deleteUserRes', function (data) {
+        if (data === "true") {
+
+            alert('Podano następujący email: ' + email + ' \n \n Usuwanie zakończyło się sukcesem');
+            var index;
+            for (let i = 0; i < users.length; i++) {
+                if (users[i].email == email) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index > -1) {
+                users.splice(index, 1);
+            }
+        } else {
+            alert('Podano następujący email: ' + email + ' \n \n Usuwanie zakończyło się niepowodzeniem');
+        }
+    });
 }
 
 
 
 export default function Main() {
+    pullUsers();
     let emailInputDelete = React.createRef();
     const refresh = userForceUpdate();
     let emailInputAdd = React.createRef();
     let passwordInputAdd = React.createRef();
-    
 
     function handleSubmitAdd(event) {
-        alert('Podano następujący email: ' + emailInputAdd.current.value + passwordInputAdd.current.value);
         event.preventDefault();
         addUser(emailInputAdd.current.value, passwordInputAdd.current.value);
         emailInputAdd.current.value = '';
@@ -77,7 +108,6 @@ export default function Main() {
     }
 
     function handleSubmitDelete(event) {
-        alert('Podano następujący email: ' + emailInputDelete.current.value);
         event.preventDefault();
         deleteUser(emailInputDelete.current.value);
         emailInputDelete.current.value = '';

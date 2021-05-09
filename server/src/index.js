@@ -1,9 +1,22 @@
 const express = require('express');
+const socket = require("socket.io");
+
 const app = express();
-const http = require('http');
-const server = http.createServer(app);
-const { Server } = require("socket.io");
-const io = new Server(server);
+
+class User {
+    constructor(email, pass) {
+        this.email = email;
+        this.password = pass;
+    }
+}
+
+var server = app.listen(4000, function(){
+    console.log('listening for requests on port 4000,');
+});
+
+var io = socket(server);
+
+
 var mysql = require('mysql');
 var connection = mysql.createConnection({
     host: 'localhost',
@@ -24,45 +37,62 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
 
-server.listen(3000, () => {
-    console.log('listening on *:3000');
-});
 
 io.on('connection', (socket) => {
-    console.log('connected');
-
+    console.log("connection");
     socket.on('loginRequest', (data) => {
-        console.log("Login user email=" + data.email + " with password=" + data.password);
         var loginQuery = 'SELECT * from door_access.users WHERE email = "' + data.email + '" AND password = "' + data.password + '"';
         connection.query(loginQuery, function (error, result, field) {
-            if (error) throw error;
+            if (error) {
+                console.log("Login user email=" + data.email + " with password=" + data.password+ ": failed");
+                socket.emit('loginRequestRes', ("false"));
+                throw error;
+            }
             if (result.length > 0) {
-                console.log("Login succes");
-                socket.emit('loginRequest', ("true"));
+                console.log("Login user email=" + data.email + " with password=" + data.password+ ": success");
+                socket.emit('loginRequestRes', ("true"));
             }
             else {
-                console.log("Login not succes");
-                socket.emit('loginRequest', ("false"));
+                console.log("Login user email=" + data.email + " with password=" + data.password+ ": failed");
+                socket.emit('loginRequestRes', ("false"));
             }
         });
     });
 
     socket.on("addUser", (data) => {
         var addQuery = 'insert ignore into users (email, password) values ("' + data.email + '", "' + data.password + '");';
-        // connection.connect(function (err) {
-        //   if (err) throw err;
-        connection.query(addQuery, function (err, results, fields) {
-            if (err) throw err;
-            console.log("Added user:" + data.email + " with password:" + data.password);
+        connection.query(addQuery, function (err, result, fields) {
+            if (err){
+                console.log("Added user:" + data.email + " with password:" + data.password+" : failed");
+                socket.emit('addUserRes', ("false"));
+                throw err;
+            }
+            else{
+                console.log("Added user:" + data.email + " with password:" + data.password+" : success");
+                socket.emit('addUserRes', ("true"));
+            }
         });
-        //});
     });
 
     socket.on('deleteUser', (data) => {
         var deleteQuery = 'DELETE from users where email = "' + data.email + '";';
-        connection.query(deleteQuery, function (err, results, fields) {
-            if (err) throw err;
-            console.log("Deleted user:" + data.email);
+
+
+        connection.query(deleteQuery, function (err, result, fields) {
+            if (err){
+                console.log("Deleted user:" + data.email+" : failed");
+                socket.emit('deleteUserRes', ("false"));
+                throw err;
+            }
+            else{
+                console.log("Deleted user:" + data.email+" : success");
+                socket.emit('deleteUserRes', ("true"));
+            }
         });
     });
+    socket.on('pullUsers', (data) => {
+        var users = [new User("test@gmail.com", "12345678"), new User("test@gmail.com", "12345678"),
+            new User("xd@lol.com", "123"), new User("asdlasdo@sfsl.com", "12asdad3")];
+        socket.emit('pullUsersRes', (users));
+    })
 });
