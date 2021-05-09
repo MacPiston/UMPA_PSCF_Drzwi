@@ -1,5 +1,7 @@
 import React from 'react';
 import { Text, Pressable, ActivityIndicator } from 'react-native';
+import { Styles } from './Stylesheets/Stylesheets';
+import { Shadows, Colors } from './Stylesheets/Stylesheets';
 
 interface ButtonProps {
   isPrimary?: boolean;
@@ -23,13 +25,15 @@ const CustomizedButton: React.FC<ButtonProps> = ({
       {!isLoading && (
         <Text
           style={
-            isPrimary ? { fontSize: 36, fontWeight: '600' } : { fontSize: 20 }
+            isPrimary
+              ? { fontSize: 36, fontWeight: '600', color: Colors.Font }
+              : { fontSize: 20, color: Colors.Font }
           }
         >
           {text}
         </Text>
       )}
-      {isLoading && <ActivityIndicator size="large" color="black" />}
+      {isLoading && <ActivityIndicator size="large" color={Colors.Accent} />}
     </Pressable>
   );
 };
