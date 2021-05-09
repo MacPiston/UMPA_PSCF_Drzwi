@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, Pressable, ActivityIndicator } from 'react-native';
-import { Shadows, Colors } from './Stylesheets/Stylesheets';
+import { Colors } from './Stylesheets/Stylesheets';
 
 interface ButtonProps {
   isPrimary?: boolean;

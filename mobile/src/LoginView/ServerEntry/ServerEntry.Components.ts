@@ -47,7 +47,6 @@ export const SecondaryText = styled(Text)`
 `;
 
 export const RangeIcon = styled(Icon)`
-  flex: 1;
   height: 100%;
   font-size: 42px;
   /* border: 1px solid black; */

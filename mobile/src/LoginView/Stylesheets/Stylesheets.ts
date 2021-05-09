@@ -9,7 +9,13 @@ export const Styles = StyleSheet.create({
   },
 });
 
-export const Colors = { Font: '#f7fbff', Accent: '#0288f5' };
+export const Colors = {
+  Font: '#f7fbff',
+  Accent: '#0288f5',
+  Alert: '#fc7e00',
+  Gray: '#8f8f8f',
+  Green: '#1abd46',
+};
 
 export const Shadows = {
   AccentBigger: '0px 0px 5px #0288f5',

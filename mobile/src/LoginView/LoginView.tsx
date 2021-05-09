@@ -19,7 +19,7 @@ import {
 } from './LoginView.Components';
 import AccountModal from './AccountModal';
 import CustomizedButton from './CustomizedButton';
-import ServerEntry from './ServerEntry/ServerEntry';
+import { ServerEntry, connectionStates } from './ServerEntry/ServerEntry';
 import ManualIP from './ManualIP/ManualIP';
 
 const LoginView: React.FC = () => {
@@ -46,7 +46,7 @@ const LoginView: React.FC = () => {
     await setTimeout(() => setRefreshing(false), 1500);
   };
 
-  const handleServerSelection = (ip: string) => {
+  const handleServerSelection = async (ip: string) => {
     setSelectedServerIP(ip);
     setLoginEnabled(true);
     // handleConnection(ip);
@@ -58,7 +58,10 @@ const LoginView: React.FC = () => {
     setSocket(tempsocket);
   };
 
-  const handleLogin = async () => {};
+  const handleLogin = async () => {
+    console.log('logging in');
+    socket?.emit('loginRequest', email, pwd);
+  };
 
   return (
     <KeyboardAvoidingView behavior="position" style={Background}>
