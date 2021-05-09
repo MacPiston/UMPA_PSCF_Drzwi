@@ -3,6 +3,8 @@ const socket = require("socket.io");
 
 const app = express();
 
+var users = [];
+
 class User {
     constructor(email, pass) {
         this.email = email;
@@ -17,6 +19,13 @@ var server = app.listen(4000, function(){
 var io = socket(server);
 
 
+function sendUsers() {
+    io.on('connection', (socket) => {
+        socket.emit('users', users);
+    });
+    
+}
+
 var mysql = require('mysql');
 var connection = mysql.createConnection({
     host: 'localhost',
@@ -29,17 +38,25 @@ connection.connect(function (err) {
     if (err) throw err;
     connection.query("SELECT * from users", function (error, results, fields) {
         if (err) throw err;
-        console.log(results);
+        for(const row of results) {
+            users.push(new User(row.email, row.password));
+            console.log(row.email + "-" + row.password);
+        }
+        sendUsers();
     });
 });
+
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
 
 
+
+
 io.on('connection', (socket) => {
     console.log("connection");
+    
     socket.on('loginRequest', (data) => {
         var loginQuery = 'SELECT * from door_access.users WHERE email = "' + data.email + '" AND password = "' + data.password + '"';
         connection.query(loginQuery, function (error, result, field) {
@@ -90,9 +107,4 @@ io.on('connection', (socket) => {
             }
         });
     });
-    socket.on('pullUsers', (data) => {
-        var users = [new User("test@gmail.com", "12345678"), new User("test@gmail.com", "12345678"),
-            new User("xd@lol.com", "123"), new User("asdlasdo@sfsl.com", "12asdad3")];
-        socket.emit('pullUsersRes', (users));
-    })
 });
