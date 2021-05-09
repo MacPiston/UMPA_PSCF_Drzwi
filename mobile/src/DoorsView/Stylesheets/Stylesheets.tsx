@@ -2,7 +2,7 @@
 import { StyleSheet } from 'react-native';
 import { Colors } from '../../AppGlobalStyles/GlobalStylesheets';
 
-export const Styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginHorizontal: 0,
@@ -13,20 +13,43 @@ export const Styles = StyleSheet.create({
     padding: 10,
     marginVertical: 4,
     marginHorizontal: 24,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+  },
+  content: {
+    paddingLeft: 50,
+    paddingRight: 50,
+    backgroundColor: Colors.LightBackground,
   },
   header: {
+    flex: 1,
     flexGrow: 1,
     fontSize: 38,
     backgroundColor: Colors.BlueAccent,
-    marginBottom: 10,
+    marginBottom: 0,
     marginVertical: 0,
     textAlign: 'center',
   },
-  tile: {
-    fontSize: 24,
+  tileText: {
+    fontSize: 20,
+  },
+  openButton: {
+    borderRadius: 8,
+    backgroundColor: '#44c282',
+    padding: 10,
+    textAlign: 'center',
+  },
+  points: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  separator: {
+    height: 0.5,
+    backgroundColor: '#808080',
+    width: '95%',
+    marginLeft: 16,
+    marginRight: 16,
   },
 });
