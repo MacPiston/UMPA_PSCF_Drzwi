@@ -27,7 +27,11 @@ const CustomizedButton: React.FC<ButtonProps> = ({
         <Text
           style={
             isPrimary
-              ? { fontSize: 36, fontWeight: '600', color: Colors.Font }
+              ? {
+                  fontSize: 36,
+                  fontWeight: '600',
+                  color: Colors.Font,
+                }
               : { fontSize: 20, color: Colors.Font }
           }
         >

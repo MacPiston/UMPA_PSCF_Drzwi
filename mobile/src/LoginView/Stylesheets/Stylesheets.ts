@@ -15,6 +15,7 @@ export const Colors = {
   Alert: '#fc7e00',
   Gray: '#8f8f8f',
   Green: '#1abd46',
+  Red: '#e30505',
 };
 
 export const Shadows = {

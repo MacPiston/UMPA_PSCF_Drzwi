@@ -1,9 +1,10 @@
 /* eslint-disable global-require */
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   SafeAreaView,
   RefreshControl,
   KeyboardAvoidingView,
+  TextInput,
 } from 'react-native';
 import { io, Socket } from 'socket.io-client';
 import { Styles } from './Stylesheets/Stylesheets';
@@ -21,6 +22,16 @@ import AccountModal from './AccountModal';
 import CustomizedButton from './CustomizedButton';
 import { ServerEntry, connectionStates } from './ServerEntry/ServerEntry';
 import ManualIP from './ManualIP/ManualIP';
+import { LoginButton, LoginStates } from './LoginView.LoginButton';
+
+const virtualServers = [
+  {
+    ip: 'localhost',
+    name: 'testy',
+    key: 1,
+    status: connectionStates.inRange,
+  },
+];
 
 const LoginView: React.FC = () => {
   const { Background } = Styles;
@@ -29,58 +40,67 @@ const LoginView: React.FC = () => {
 
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [loginEnabled, setLoginEnabled] = useState<boolean>(false);
+  const [loginState, setLoginState] = useState<number>(LoginStates.disabled);
 
   const [socket, setSocket] = useState<Socket>();
   const [selectedServerIP, setSelectedServerIP] = useState<string>('');
+  const [socketConnected, setSocketConnected] = useState<boolean>(false);
 
-  const virtualServers = [
-    {
-      ip: '192.168.50.1',
-      name: 'testowy 1',
-      key: 1,
-      status: connectionStates.none,
-    },
-    {
-      ip: '255.255.255.0',
-      name: 'testowy 2',
-      key: 2,
-      status: connectionStates.inRange,
-    },
-    {
-      ip: '127.0.0.1',
-      name: 'testowy 3',
-      key: 3,
-      status: connectionStates.connected,
-    },
-    {
-      ip: '123.123.123.123',
-      name: 'testowy 4',
-      key: 4,
-      status: connectionStates.connecting,
-    },
-  ];
+  const emailInputRef = useRef() as React.MutableRefObject<TextInput>;
+  const pwdInputRef = useRef() as React.MutableRefObject<TextInput>;
 
   const handleRefresh = async () => {
+    if (socket) socket.disconnect();
+
     setRefreshing(true);
+    setLoginState(LoginStates.disabled);
+    setSelectedServerIP(null);
+
+    emailInputRef.current.clear();
+    pwdInputRef.current.clear();
+
     await setTimeout(() => setRefreshing(false), 1500);
   };
 
-  const handleServerSelection = async (ip: string) => {
-    setSelectedServerIP(ip);
-    setLoginEnabled(true);
-    // handleConnection(ip);
+  const handleLoginResponse = (response: boolean) => {
+    console.log(response);
+    setLoginState(
+      response ? LoginStates.loginSuccess : LoginStates.loginFailed,
+    );
   };
 
   const handleConnection = async (ip: string = selectedServerIP) => {
-    const address = 'http://'.concat(ip).concat(':4000');
-    const tempsocket = io(address, { transports: ['websocket'] });
-    setSocket(tempsocket);
+    if (ip) {
+      const address = 'http://'.concat(ip).concat(':4000');
+      if (socket) socket.disconnect();
+      const tempsocket = io(address, { transports: ['websocket'] });
+      tempsocket.on('connect', () => {
+        setSocketConnected(true);
+        setLoginState(LoginStates.enabled);
+      });
+      tempsocket.on('loginRequestRes', (data) => handleLoginResponse(data));
+      setSocket(tempsocket);
+    }
+  };
+
+  const handleServerSelection = async (ip: string) => {
+    emailInputRef.current.clear();
+    pwdInputRef.current.clear();
+    setSelectedServerIP(ip);
+    handleConnection(ip);
   };
 
   const handleLogin = async () => {
-    console.log('logging in');
-    socket?.emit('loginRequest', email, pwd);
+    if (socketConnected) {
+      console.log('logging in');
+      console.log(email);
+      console.log(pwd);
+      setLoginState(LoginStates.loading);
+      setTimeout(
+        () => socket?.emit('loginRequest', { email, password: pwd }),
+        600,
+      );
+    }
   };
 
   return (
@@ -127,30 +147,26 @@ const LoginView: React.FC = () => {
 
           <InputContainer>
             <StyledTextInput
+              ref={emailInputRef}
               autoCompleteType="email"
               keyboardType="email-address"
               placeholder="Email address..."
               onChangeText={setEmail}
-              editable={loginEnabled && !refreshing}
+              editable={loginState === 0}
             />
             <StyledTextInput
+              ref={pwdInputRef}
               autoCompleteType="password"
               keyboardType="default"
               secureTextEntry
               placeholder="Password..."
               onChangeText={setPwd}
-              editable={loginEnabled && !refreshing}
+              editable={loginState === 0}
             />
           </InputContainer>
 
           <ButtonsContainer>
-            <CustomizedButton
-              disabled={refreshing || !loginEnabled}
-              loading={refreshing}
-              isPrimary
-              text="Login"
-              onPress={() => handleLogin()}
-            />
+            <LoginButton onPress={handleLogin} state={loginState} />
             <CustomizedButton
               text="Need account?"
               onPress={() => setModalVisible(true)}
