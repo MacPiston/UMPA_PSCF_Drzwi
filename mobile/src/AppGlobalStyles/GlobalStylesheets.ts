@@ -10,9 +10,12 @@ export const Styles = StyleSheet.create({
 
 export const Colors = {
   Font: '#f7fbff',
+  LightBlueAccent: '#91bcff',
   BlueAccent: '#007CBE',
   TileBackgroud: '#f5f5f5',
-  LightBackground: '#d6d6d6',
+  LightBackground: '#6e6e6e',
+  GrayAccent: '#404040',
+  GreenAccent: '#93f594',
 };
 
 export const Shadows = {

@@ -21,7 +21,8 @@
     "react-native-elements": "^3.4.1",
     "react-native-safe-area-context": "^3.2.0",
     "react-native-screens": "^3.1.1",
-    "socket.io-client": "^4.0.1",
+    "react-native-vector-icons": "^8.1.0",
+    "socket.io-client": "^4.0.2",
     "styled-components": "^5.2.3"
   },
   "devDependencies": {
@@ -45,7 +46,8 @@
     "metro-react-native-babel-preset": "^0.64.0",
     "prettier": "^2.2.1",
     "react-test-renderer": "17.0.1",
-    "typescript": "^3.9.9"
+    "typescript": "^3.9.9",
+    "webpack": "^5.36.2"
   },
   "resolutions": {
     "@types/react": "^17"
