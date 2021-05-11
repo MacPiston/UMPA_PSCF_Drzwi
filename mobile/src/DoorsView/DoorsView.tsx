@@ -38,19 +38,14 @@ const DoorsView = () => {
         >
           <Icon name="log-out" style={styles.headerButton}></Icon>
         </Pressable>
-        <Text style={styles.header}>Dostępne drzwi</Text>
+        <Text style={styles.headerText}>Dostępne drzwi</Text>
         <Pressable
           onPress={() => console.log('Available doors list has been refreshed')}
         >
           <Icon name="refresh-ccw" style={styles.headerButton}></Icon>
         </Pressable>
       </View>
-      <ScrollView
-        style={{
-          flex: 1,
-          flexGrow: 1,
-        }}
-      >
+      <ScrollView>
         {listDataSource.map((item, key) => (
           <ExpandableItem
             key={item.room_name}

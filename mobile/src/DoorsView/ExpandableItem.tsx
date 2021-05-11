@@ -21,11 +21,11 @@ const ExpandableItem = ({ item, onPressFunction }) => {
         activeOpacity={0.8}
         onPress={onPressFunction}
         style={[
-          styles.item,
+          styles.accordionHeaderItem,
           item.inBtRange ? styles.inRangeColor : styles.outOfRangeColor,
         ]}
       >
-        <Text style={styles.tileText}>{item.room_name}</Text>
+        <Text style={styles.accordionHeaderText}>{item.room_name}</Text>
       </TouchableOpacity>
       <View
         style={{
@@ -36,14 +36,14 @@ const ExpandableItem = ({ item, onPressFunction }) => {
         {/* Content under the header of the Expandable List Item */}
         <TouchableOpacity
           activeOpacity={0.5}
-          style={styles.content}
+          style={styles.accordionListElement}
           onPress={() =>
             item.inBtRange
               ? alert('Otwarto ' + item.room_name)
               : alert(item.room_name + ' nie są w zasięgu')
           }
         >
-          <Text style={styles.openButton}>Otwórz drzwi</Text>
+          <Text style={styles.accordionListElementText}>Otwórz drzwi</Text>
         </TouchableOpacity>
       </View>
     </View>

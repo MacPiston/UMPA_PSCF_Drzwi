@@ -8,24 +8,11 @@ export const styles = StyleSheet.create({
     marginHorizontal: 0,
     backgroundColor: Colors.LightBackground,
   },
-  item: {
-    padding: 10,
-    marginVertical: 4,
-    marginHorizontal: 24,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-  },
   inRangeColor: {
     backgroundColor: Colors.GreenAccent,
   },
   outOfRangeColor: {
     backgroundColor: Colors.TileBackgroud,
-  },
-  content: {
-    paddingLeft: 50,
-    paddingRight: 50,
   },
   headerRow: {
     flexDirection: 'row',
@@ -33,7 +20,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     textAlign: 'center',
   },
-  header: {
+  headerText: {
     flexGrow: 1,
     fontSize: 38,
     backgroundColor: Colors.GrayAccent,
@@ -54,21 +41,28 @@ export const styles = StyleSheet.create({
     paddingLeft: 14,
     paddingRight: 14,
   },
-  tileText: {
-    fontSize: 20,
+  accordionHeaderItem: {
+    padding: 10,
+    marginVertical: 4,
+    marginHorizontal: 24,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
   },
-  openButton: {
+  accordionHeaderText: {
+    fontSize: 24,
+  },
+  accordionListElement: {
+    paddingLeft: 50,
+    paddingRight: 50,
+  },
+  accordionListElementText: {
+    fontSize: 24,
     borderRadius: 8,
     backgroundColor: Colors.GrayAccent,
-    padding: 20,
+    padding: 10,
     textAlign: 'center',
     color: Colors.Font,
-  },
-  separator: {
-    height: 0.5,
-    backgroundColor: '#808080',
-    width: '95%',
-    marginLeft: 16,
-    marginRight: 16,
   },
 });
