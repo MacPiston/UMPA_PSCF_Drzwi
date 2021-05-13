@@ -52,6 +52,12 @@
         <input id="email_perm2" type="text" placeholder="Email" />
         <button id="delete-perm">Delete Permission</button>
     </div>
+    <div id="deltePermission">
+        <h2>Get doors for user</h2>
+        <input id="email_list" type="text" placeholder="Email" />
+        <button id="get-doors">Get doors</button>
+    </div>
+    
 
     <script>
         var socket = io();
@@ -70,6 +76,17 @@
 
         var addPermissionButton = document.getElementById('add-perm');
         var deletePermissionButton = document.getElementById('delete-perm');
+
+        var getUsersButton = document.getElementById('get-doors');
+
+        getUsersButton.addEventListener('click', function(e){
+            var emailInput = document.getElementById('email_list');
+            console.log("elo");
+            socket.emit("doorsList", {email: emailInput.value});
+            socket.on('doors', function (data) {
+                    console.log(data);
+                });
+        });
 
         addPermissionButton.addEventListener('click', function(e) {
             var lockIDInput = document.getElementById('lockID_perm');

@@ -4,12 +4,44 @@ const socket = require("socket.io");
 const app = express();
 
 var users = [];
+var doors = [];
+var permissions = [];
 
 class User {
     constructor(email, pass) {
         this.email = email;
         this.password = pass;
     }
+}
+
+class Door {
+    constructor(lockID, doorName) {
+        this.lockID = lockID;
+        this.doorName = doorName;
+    }
+}
+
+class Permission {
+    constructor(lockID, email) {
+        this.lockID = lockID;
+        this.email = email;
+    }
+}
+
+function getUsersDoors(userEmail) {
+    var doorList = [];
+    var permissionsArray = permissions.filter(function(el) {
+        return el.email == userEmail;
+    });
+    for(const door of doors) {
+        for(const perm of permissionsArray) {
+            if(door.lockID == perm.lockID) {
+                doorList.push(door);
+                break;
+            }
+        }
+    }
+    return doorList;
 }
 
 var server = app.listen(4000, function(){
@@ -43,6 +75,23 @@ connection.connect(function (err) {
             console.log(row.email + "-" + row.password);
         }
         sendUsers();
+    });
+
+    connection.query("SELECT * from doors", function(error, results, fields) {
+        if(err) throw err;
+        for(const row of results) {
+            doors.push(new Door(row.lockID, row.door_name));
+        }
+        console.log(doors);
+    });
+
+    connection.query("SELECT * from permissions", function(error, results, fields) {
+        if(err) throw err;
+        for(const row of results) {
+            permissions.push(new Permission(row.lockID, row.email));
+        }
+        console.log(permissions);
+        console.log(getUsersDoors("email@email.com"));
     });
 });
 
@@ -169,4 +218,12 @@ io.on('connection', (socket) => {
         });
     });
 
+    socket.on('doorsList', (data) => {
+        console.log("doorsList emited");
+        var doorsList = getUsersDoors(data.email);
+        socket.emit('doors', {doorsList: doorsList});
+        console.log(doorsList);
+    });
 });
+
+
