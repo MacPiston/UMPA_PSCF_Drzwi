@@ -48,7 +48,6 @@ const LoginView: React.FC = () => {
 
   const [socket, setSocket] = useState<Socket>();
   const [selectedServerIP, setSelectedServerIP] = useState<string>('');
-  const [socketConnected, setSocketConnected] = useState<boolean>(false);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -63,11 +62,12 @@ const LoginView: React.FC = () => {
     await setTimeout(() => setRefreshing(false), 1500);
   };
 
-  const handleLoginResponse = (response: boolean) => {
+  const handleLoginResponse = async (response: boolean) => {
     console.log(response);
     setLoginState(
       response ? loginStates.loginSuccess : loginStates.loginFailed,
     );
+    setTimeout(() => setLoginState(loginStates.enabled), 1500);
   };
 
   const handleConnection = (ip: string = selectedServerIP) => {
@@ -81,16 +81,16 @@ const LoginView: React.FC = () => {
       const tempsocket = io(address, { transports: ['websocket'] });
 
       tempsocket.on('connect', () => {
-        setSocketConnected(true);
+        setSocket(tempsocket);
         setLoginState(loginStates.enabled);
       });
-      tempsocket.on('loginRequestRes', (data) => handleLoginResponse(data));
-
-      setSocket(tempsocket);
+      tempsocket.on('loginRequestRes', async (data) =>
+        handleLoginResponse(data),
+      );
     }
   };
 
-  const manualIPConnection = async (ip: string) => {
+  const manualIPSelection = async (ip: string) => {
     const newServer: server = {
       name: 'nowy',
       ip,
@@ -99,8 +99,9 @@ const LoginView: React.FC = () => {
     };
     const newServers = [...servers, newServer];
     setServers(newServers);
-    setSelectedServerIP(ip);
     await saveServers(newServers);
+
+    setSelectedServerIP(ip);
     handleConnection(ip);
   };
 
@@ -116,7 +117,7 @@ const LoginView: React.FC = () => {
   };
 
   const handleLogin = async () => {
-    if (socketConnected) {
+    if (socket?.connected) {
       console.log('logging in');
       console.log(email);
       console.log(pwd);
@@ -140,7 +141,7 @@ const LoginView: React.FC = () => {
     return () => {
       if (socket) socket.disconnect();
     };
-  });
+  }, []);
 
   return (
     <KeyboardAvoidingView behavior="position" style={Background}>
@@ -182,7 +183,7 @@ const LoginView: React.FC = () => {
                   />
                 );
               })}
-            <ManualIP connectionHandler={manualIPConnection} />
+            <ManualIP connectionHandler={manualIPSelection} />
           </ServerScrollView>
 
           <InputContainer>
