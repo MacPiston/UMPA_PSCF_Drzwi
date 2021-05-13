@@ -138,6 +138,35 @@ io.on('connection', (socket) => {
 
             }
         });
-    });    
+    });
+
+    socket.on('addPermission', (data) => {
+        var addPermissionQuery = 'insert ignore into permissions (lockID, email) values ("' 
+        + data.lockID + '", "' + data.email + '");';
+        connection.query(addPermissionQuery, function(err, result, fields) {
+            if(err) {
+                console.log("Adding permission: " + data.lockID + " : " + data.email + " failed");
+                socket.emit('addPermissionRes', {lockID: data.lockID, email: data.email, error: false});
+                throw err;
+            } else {
+                console.log("Adding permission: " + data.lockID + " : " + data.email + " succeed");
+                socket.emit('addPermissionRes', {lockID: data.lockID, email: data.email, error: true});
+            }
+        });
+    });
+
+    socket.on('deletePermission', (data) => {
+        var deletePermissionQuery = 'DELETE from permissions where lockID = "' + data.lockID + '" AND email="' + data.email + '";';
+        connection.query(deletePermissionQuery, function(err, result, fields) {
+            if(err) {
+                console.log("Deleting permission: " + data.lockID + " : " + data.email + " failed");
+                socket.emit('deletePermissionRes', {lockID: data.lockID, email: data.email, error: false});
+                throw err;
+            } else {
+                console.log("Deleting permission: " + data.lockID + " : " + data.email + " succeed");
+                socket.emit('deletePermissionRes', {lockID: data.lockID, email: data.email, error: true});
+            }
+        });
+    });
 
 });

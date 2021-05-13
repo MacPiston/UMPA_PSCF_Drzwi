@@ -39,6 +39,20 @@
         <input id="lockID2" type="text" placeholder="LockID" />
         <button id="delete-doors">Delete Doors</button>
     </div>
+
+    <div id="addPermision">
+        <h2>Dodawanie uprawnien</h2>
+        <input id="lockID_perm" type="text" placeholder="LockID" />
+        <input id="email_perm" type="text" placeholder="Email" />
+        <button id="add-perm">Add Permission</button>
+    </div>
+    <div id="deltePermission">
+        <h2>Usuwanie uprawnien</h2>
+        <input id="lockID_perm2" type="text" placeholder="LockID" />
+        <input id="email_perm2" type="text" placeholder="Email" />
+        <button id="delete-perm">Delete Permission</button>
+    </div>
+
     <script>
         var socket = io();
 
@@ -53,6 +67,29 @@
 
         var addDoorsButton = document.getElementById('add-doors');
         var deleteDoorsButton = document.getElementById('delete-doors');
+
+        var addPermissionButton = document.getElementById('add-perm');
+        var deletePermissionButton = document.getElementById('delete-perm');
+
+        addPermissionButton.addEventListener('click', function(e) {
+            var lockIDInput = document.getElementById('lockID_perm');
+            var emailInput = document.getElementById('email_perm');
+            if(lockIDInput.value && emailInput.value) {
+                socket.emit("addPermission", {lockID: lockIDInput.value, email: emailInput.value});
+                lockIDInput.value = '';
+                emailInput.value = '';
+            }
+        });
+
+        deletePermissionButton.addEventListener('click', function(e) {
+            var lockIDInput = document.getElementById('lockID_perm2');
+            var emailInput = document.getElementById('email_perm2');
+            if(lockIDInput.value && emailInput.value) {
+                socket.emit("deletePermission", {lockID: lockIDInput.value, email: emailInput.value});
+                lockIDInput.value = '';
+                emailInput.value = '';
+            }
+        });
 
         addDoorsButton.addEventListener('click', function(e) {
             var lockIDInput = document.getElementById('lockID');
