@@ -5,6 +5,7 @@ import {
   RefreshControl,
   KeyboardAvoidingView,
   TextInput,
+  Platform,
 } from 'react-native';
 import { io, Socket } from 'socket.io-client';
 import { Styles } from './Stylesheets/Stylesheets';
@@ -53,7 +54,6 @@ const LoginView: React.FC = () => {
     setRefreshing(true);
 
     if (socket) socket.disconnect();
-    setLoginState(loginStates.disabled);
     setSelectedServerIP('');
 
     emailInputRef.current.clear();
@@ -84,6 +84,7 @@ const LoginView: React.FC = () => {
         setSocket(tempsocket);
         setLoginState(loginStates.enabled);
       });
+      tempsocket.on('disconnect', () => setLoginState(loginStates.disabled));
       tempsocket.on('loginRequestRes', async (data) =>
         handleLoginResponse(data),
       );
@@ -144,7 +145,10 @@ const LoginView: React.FC = () => {
   }, []);
 
   return (
-    <KeyboardAvoidingView behavior="position" style={Background}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'position' : 'padding'}
+      style={Background}
+    >
       <SafeAreaView>
         <LoginViewContainer>
           <HeaderText>door_system</HeaderText>
