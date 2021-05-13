@@ -22,39 +22,40 @@ import AccountModal from './AccountModal';
 import CustomizedButton from './CustomizedButton';
 import { ServerEntry, connectionStates } from './ServerEntry/ServerEntry';
 import ManualIP from './ManualIP/ManualIP';
-import { LoginButton, LoginStates } from './LoginView.LoginButton';
+import { LoginButton, loginStates } from './LoginView.LoginButton';
+import useLocalStorage from './useLocalStorage';
 
-const virtualServers = [
-  {
-    ip: 'localhost',
-    name: 'testy',
-    key: 1,
-    status: connectionStates.inRange,
-  },
-];
+interface server {
+  name: string;
+  ip: string;
+  key: number;
+  status: number;
+}
 
 const LoginView: React.FC = () => {
   const { Background } = Styles;
   const [email, setEmail] = useState<string>('');
   const [pwd, setPwd] = useState<string>('');
+  const emailInputRef = useRef() as React.MutableRefObject<TextInput>;
+  const pwdInputRef = useRef() as React.MutableRefObject<TextInput>;
+
+  const [fetchServers, saveServers] = useLocalStorage<server[]>('servers');
+  const [servers, setServers] = useState<server[]>([]);
 
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [loginState, setLoginState] = useState<number>(LoginStates.disabled);
+  const [loginState, setLoginState] = useState<number>(loginStates.disabled);
 
   const [socket, setSocket] = useState<Socket>();
   const [selectedServerIP, setSelectedServerIP] = useState<string>('');
   const [socketConnected, setSocketConnected] = useState<boolean>(false);
 
-  const emailInputRef = useRef() as React.MutableRefObject<TextInput>;
-  const pwdInputRef = useRef() as React.MutableRefObject<TextInput>;
-
   const handleRefresh = async () => {
-    if (socket) socket.disconnect();
-
     setRefreshing(true);
-    setLoginState(LoginStates.disabled);
-    setSelectedServerIP(null);
+
+    if (socket) socket.disconnect();
+    setLoginState(loginStates.disabled);
+    setSelectedServerIP('');
 
     emailInputRef.current.clear();
     pwdInputRef.current.clear();
@@ -65,29 +66,53 @@ const LoginView: React.FC = () => {
   const handleLoginResponse = (response: boolean) => {
     console.log(response);
     setLoginState(
-      response ? LoginStates.loginSuccess : LoginStates.loginFailed,
+      response ? loginStates.loginSuccess : loginStates.loginFailed,
     );
   };
 
-  const handleConnection = async (ip: string = selectedServerIP) => {
-    if (ip) {
+  const handleConnection = (ip: string = selectedServerIP) => {
+    if (socket) socket.disconnect();
+    setLoginState(loginStates.disabled);
+    emailInputRef.current.clear();
+    pwdInputRef.current.clear();
+
+    if (ip && ip !== '') {
       const address = 'http://'.concat(ip).concat(':4000');
-      if (socket) socket.disconnect();
       const tempsocket = io(address, { transports: ['websocket'] });
+
       tempsocket.on('connect', () => {
         setSocketConnected(true);
-        setLoginState(LoginStates.enabled);
+        setLoginState(loginStates.enabled);
       });
       tempsocket.on('loginRequestRes', (data) => handleLoginResponse(data));
+
       setSocket(tempsocket);
     }
   };
 
-  const handleServerSelection = async (ip: string) => {
-    emailInputRef.current.clear();
-    pwdInputRef.current.clear();
+  const manualIPConnection = async (ip: string) => {
+    const newServer: server = {
+      name: 'nowy',
+      ip,
+      key: servers.length,
+      status: connectionStates.inRange,
+    };
+    const newServers = [...servers, newServer];
+    setServers(newServers);
+    setSelectedServerIP(ip);
+    await saveServers(newServers);
+    handleConnection(ip);
+  };
+
+  const handleServerSelection = (ip: string) => {
     setSelectedServerIP(ip);
     handleConnection(ip);
+  };
+
+  const handleServerDeletion = (key: number) => {
+    const newServers = servers.splice(key, 1);
+    setServers(newServers);
+    saveServers(newServers);
   };
 
   const handleLogin = async () => {
@@ -95,13 +120,27 @@ const LoginView: React.FC = () => {
       console.log('logging in');
       console.log(email);
       console.log(pwd);
-      setLoginState(LoginStates.loading);
+      setLoginState(loginStates.loading);
       setTimeout(
         () => socket?.emit('loginRequest', { email, password: pwd }),
         600,
       );
     }
   };
+
+  useEffect(() => {
+    const fetchServersAsync = async () => {
+      const temp = await fetchServers();
+      if (temp) setServers(temp);
+    };
+    fetchServersAsync();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (socket) socket.disconnect();
+    };
+  });
 
   return (
     <KeyboardAvoidingView behavior="position" style={Background}>
@@ -126,9 +165,9 @@ const LoginView: React.FC = () => {
             >
               Select a server to log into:
             </SecondaryText>
-            {virtualServers
+            {servers
               .sort((a, b) => {
-                return b.status - a.status;
+                return b.key - a.key;
               })
               .map((element) => {
                 return (
@@ -138,11 +177,12 @@ const LoginView: React.FC = () => {
                     ip={element.ip}
                     isSelected={element.ip === selectedServerIP}
                     onPress={() => handleServerSelection(element.ip)}
+                    onLongPress={() => handleServerDeletion(element.key)}
                     connectionStatus={element.status}
                   />
                 );
               })}
-            <ManualIP connectionHandler={handleConnection} />
+            <ManualIP connectionHandler={manualIPConnection} />
           </ServerScrollView>
 
           <InputContainer>

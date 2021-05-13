@@ -1,9 +1,9 @@
-import { Text, View } from 'react-native';
+import { Text, View, Pressable } from 'react-native';
 import styled from 'styled-components';
 import Icon from 'react-native-vector-icons/AntDesign';
 import { Shadows, Colors } from '../Stylesheets/Stylesheets';
 
-export const EntryContainer = styled(View)`
+export const EntryContainer = styled(Pressable)`
   margin-top: -0.5px;
 
   height: 80px;

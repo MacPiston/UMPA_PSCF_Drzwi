@@ -3,7 +3,7 @@ import { Text, Pressable, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 import { Colors } from './Stylesheets/Stylesheets';
 
-export const LoginStates = {
+export const loginStates = {
   enabled: 0,
   disabled: 1,
   loading: 2,

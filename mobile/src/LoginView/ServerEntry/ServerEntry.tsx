@@ -19,9 +19,10 @@ export const connectionStates = {
 interface EntryProps {
   ip: string;
   description: string;
-  connectionStatus?: number;
-  isSelected?: boolean;
-  onPress?: () => void;
+  connectionStatus: number;
+  isSelected: boolean;
+  onPress: () => void;
+  onLongPress: () => void;
 }
 
 export const ServerEntry: React.FC<EntryProps> = ({
@@ -30,6 +31,7 @@ export const ServerEntry: React.FC<EntryProps> = ({
   isSelected,
   onPress,
   connectionStatus = connectionStates.none,
+  onLongPress,
 }: EntryProps) => {
   const switchIcon = () => {
     switch (connectionStatus) {
@@ -46,7 +48,7 @@ export const ServerEntry: React.FC<EntryProps> = ({
   };
 
   return (
-    <EntryContainer onTouchStart={onPress}>
+    <EntryContainer onPress={onPress} onLongPress={onLongPress}>
       <CheckIcon
         name="check"
         color={isSelected ? 'lightblue' : 'transparent'}

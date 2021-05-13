@@ -14,13 +14,6 @@ const ManualIP: React.FC<ManualIPProps> = ({
   connectionHandler,
 }: ManualIPProps) => {
   const [address, setAddress] = useState<string>('');
-  const [isConnecting, setIsConnecting] = useState<boolean>(false);
-
-  const connect = async () => {
-    setIsConnecting(true);
-    await connectionHandler(address);
-    setIsConnecting(false);
-  };
 
   return (
     <ViewContainerVertical>
@@ -29,12 +22,12 @@ const ManualIP: React.FC<ManualIPProps> = ({
       </SecondaryText>
       <InputContainerHorizontal>
         <StyledTextInput
-          editable={!isConnecting}
+          editable
           style={{ height: 40, flex: 7 }}
           placeholder="Server's IP"
           onChangeText={setAddress}
         />
-        <ConnectIcon onPress={connect} />
+        <ConnectIcon onPress={() => connectionHandler(address)} />
       </InputContainerHorizontal>
     </ViewContainerVertical>
   );
