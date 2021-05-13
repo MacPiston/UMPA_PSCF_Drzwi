@@ -28,6 +28,17 @@
         <input id="email-old-user" type="text" placeholder="Email" />
         <button id="delete-user">Delete user</button>
     </div>
+    <div id="adddoors">
+        <h2>Dodawanie drzwi</h2>
+        <input id="lockID" type="text" placeholder="LockID" />
+        <input id="doorName" type="text" placeholder="Door name" />
+        <button id="add-doors">Add Doors</button>
+    </div>
+    <div id="deletedoors">
+        <h2>Usuwanie drzwi</h2>
+        <input id="lockID2" type="text" placeholder="LockID" />
+        <button id="delete-doors">Delete Doors</button>
+    </div>
     <script>
         var socket = io();
 
@@ -39,6 +50,27 @@
         var addUserButton = document.getElementById('add-user');
 
         var deleteUserButton = document.getElementById('delete-user');
+
+        var addDoorsButton = document.getElementById('add-doors');
+        var deleteDoorsButton = document.getElementById('delete-doors');
+
+        addDoorsButton.addEventListener('click', function(e) {
+            var lockIDInput = document.getElementById('lockID');
+            var doorNameInput = document.getElementById('doorName');
+            if(lockIDInput.value && doorNameInput.value) {
+                socket.emit("addDoors", {lockID: lockIDInput.value, doorName: doorNameInput.value});
+                lockIDInput.value = '';
+                doorNameInput.value = '';
+            }
+        });
+
+        deleteDoorsButton.addEventListener('click', function(e) {
+            var lockIDInput = document.getElementById('lockID2');
+            if(lockIDInput.value) {
+                socket.emit("deleteDoors", {lockID: lockIDInput.value});
+                lockIDInput = '';
+            }
+        });
 
         addUserButton.addEventListener('click', function (e) {
             var email = document.getElementById("email-new-user");

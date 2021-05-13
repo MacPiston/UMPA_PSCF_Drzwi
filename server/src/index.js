@@ -107,4 +107,37 @@ io.on('connection', (socket) => {
             }
         });
     });
+
+    socket.on('addDoors', (data) => {
+        var addDoorQuery = 'insert ignore into doors (lockID, door_name) values ("' 
+            + data.lockID + '", "' + data.doorName + '");'; 
+        
+        connection.query(addDoorQuery, function(err, result, fields) {
+            if(err) {
+                console.log("Adding doors: " + data.lockID + "failed");
+                socket.emit('addDoorsRes', {lockID: data.lockID, doorName: data.doorName, error: false});
+                throw err;
+            } else {
+                console.log("Adding doors: " + data.lockID + "succeed");
+                socket.emit('addDoorsRes', {lockID: data.lockID, doorName: data.doorName, error: true});
+            }
+        });
+    });
+
+    socket.on('deleteDoors', (data) => {
+        var deleteDoorQuery = 'DELETE from doors where lockID = "' + data.lockID + '";';
+
+        connection.query(deleteDoorQuery, function(err, result, fields) {
+            if(err) {
+                console.log("Deleting doors: " + data.lockID + "failed");
+                socket.emit('deleteDoorsRes', {lockID: data.lockID, error: false});
+                throw err;
+            } else {
+                console.log("Deleting doors: " + data.lockID + "succeed");
+                socket.emit('deleteDoorsRes', {lockID: data.lockID, error: true});
+
+            }
+        });
+    });    
+
 });
