@@ -55,7 +55,7 @@ connection.query('insert ignore into doors (lockID, door_name) values ("200.200.
 
 //-----------------------------------------------------------------------------------------------------
 
-connection.query("CREATE TABLE IF NOT EXISTS  `door_access`.`permissions` (`lockID` VARCHAR(45) NOT NULL,`email` VARCHAR(45) NULL, CONSTRAINT `FK_lockID` FOREIGN KEY (`lockID`) REFERENCES `door_access`.`doors` (`lockID`) ON DELETE CASCADE ON UPDATE CASCADE, CONSTRAINT `FK_email` FOREIGN KEY (`email`) REFERENCES `door_access`.`users` (`email`) ON DELETE CASCADE ON UPDATE CASCADE) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8 COLLATE = utf8_polish_ci;"
+connection.query("CREATE TABLE IF NOT EXISTS  `door_access`.`permissions` (`lockID` VARCHAR(45) NOT NULL,`email` VARCHAR(45) NOT NULL, PRIMARY KEY(`lockID`, `email`), CONSTRAINT `FK_lockID` FOREIGN KEY (`lockID`) REFERENCES `door_access`.`doors` (`lockID`) ON DELETE CASCADE ON UPDATE CASCADE, CONSTRAINT `FK_email` FOREIGN KEY (`email`) REFERENCES `door_access`.`users` (`email`) ON DELETE CASCADE ON UPDATE CASCADE) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8 COLLATE = utf8_polish_ci;"
 , function (err) {
     if (err) throw err;
         console.log("Doors data table has been created.");
