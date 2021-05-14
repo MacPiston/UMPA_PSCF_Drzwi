@@ -18,7 +18,6 @@ const DoorsView = () => {
   const updateLayout = (index) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     const array = [...listDataSource];
-    // If single select is enabled
     array.map((value, placeindex) =>
       placeindex === index
         ? (array[placeindex]['isExpanded'] = !array[placeindex]['isExpanded'])
