@@ -39,7 +39,7 @@ export const PrimaryText = styled(Text)`
 
 export const SecondaryText = styled(Text)`
   flex: 1;
-  font-size: 21px;
+  font-size: 22px;
   padding-bottom: 12px;
   /* border: 1px solid black; */
   color: ${Colors.Font};

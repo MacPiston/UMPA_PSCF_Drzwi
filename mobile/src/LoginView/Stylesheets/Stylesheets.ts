@@ -3,8 +3,10 @@ import { StyleSheet } from 'react-native';
 
 export const Styles = StyleSheet.create({
   Background: {
-    height: '100%',
+    flex: 1,
     width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
     backgroundColor: '#373838',
   },
 });

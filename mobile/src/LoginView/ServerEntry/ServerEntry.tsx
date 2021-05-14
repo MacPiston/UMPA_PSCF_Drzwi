@@ -9,13 +9,7 @@ import {
   CheckIcon,
 } from './ServerEntry.Components';
 import { Colors } from '../Stylesheets/Stylesheets';
-
-export const connectionStates = {
-  none: 0,
-  inRange: 1,
-  connecting: 2,
-  connected: 3,
-};
+import { connectionStates } from '../ServersReducer';
 interface EntryProps {
   ip: string;
   description: string;
@@ -25,7 +19,7 @@ interface EntryProps {
   onLongPress: () => void;
 }
 
-export const ServerEntry: React.FC<EntryProps> = ({
+const ServerEntry: React.FC<EntryProps> = ({
   ip,
   description,
   isSelected,
@@ -72,3 +66,5 @@ export const ServerEntry: React.FC<EntryProps> = ({
     </EntryContainer>
   );
 };
+
+export default ServerEntry;

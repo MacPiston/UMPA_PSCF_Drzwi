@@ -1,12 +1,6 @@
 /* eslint-disable global-require */
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  SafeAreaView,
-  RefreshControl,
-  KeyboardAvoidingView,
-  TextInput,
-  Platform,
-} from 'react-native';
+import React, { useEffect, useReducer, useRef, useState } from 'react';
+import { RefreshControl, KeyboardAvoidingView, TextInput } from 'react-native';
 import { io, Socket } from 'socket.io-client';
 import { Styles } from './Stylesheets/Stylesheets';
 import {
@@ -21,17 +15,16 @@ import {
 } from './LoginView.Components';
 import AccountModal from './AccountModal';
 import CustomizedButton from './CustomizedButton';
-import { ServerEntry, connectionStates } from './ServerEntry/ServerEntry';
+import ServerEntry from './ServerEntry/ServerEntry';
 import ManualIP from './ManualIP/ManualIP';
 import { LoginButton, loginStates } from './LoginView.LoginButton';
 import useLocalStorage from './useLocalStorage';
-
-interface server {
-  name: string;
-  ip: string;
-  key: number;
-  status: number;
-}
+import {
+  server,
+  serversReducer,
+  connectionStates,
+  ActionState,
+} from './ServersReducer';
 
 const LoginView: React.FC = () => {
   const { Background } = Styles;
@@ -41,20 +34,20 @@ const LoginView: React.FC = () => {
   const pwdInputRef = useRef() as React.MutableRefObject<TextInput>;
 
   const [fetchServers, saveServers] = useLocalStorage<server[]>('servers');
-  const [servers, setServers] = useState<server[]>([]);
+  const [selectedServerKey, setSelectedServerKey] = useState<number>(-1);
+  const [servers, srvDispatch] = useReducer(serversReducer, []);
 
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [isModalVisible, setModalVisible] = useState<boolean>(false);
+  const [isRefreshing, setRefreshing] = useState<boolean>(false);
   const [loginState, setLoginState] = useState<number>(loginStates.disabled);
 
   const [socket, setSocket] = useState<Socket>();
-  const [selectedServerIP, setSelectedServerIP] = useState<string>('');
 
   const handleRefresh = async () => {
     setRefreshing(true);
 
     if (socket) socket.disconnect();
-    setSelectedServerIP('');
+    setSelectedServerKey(-1);
 
     emailInputRef.current.clear();
     pwdInputRef.current.clear();
@@ -70,11 +63,13 @@ const LoginView: React.FC = () => {
     setTimeout(() => setLoginState(loginStates.enabled), 1500);
   };
 
-  const handleConnection = (ip: string = selectedServerIP) => {
+  const handleConnection = (key: number) => {
     if (socket) socket.disconnect();
     setLoginState(loginStates.disabled);
     emailInputRef.current.clear();
     pwdInputRef.current.clear();
+
+    const ip = servers.find((e) => e.key === key)?.ip;
 
     if (ip && ip !== '') {
       const address = 'http://'.concat(ip).concat(':4000');
@@ -96,32 +91,34 @@ const LoginView: React.FC = () => {
       name: 'nowy',
       ip,
       key: servers.length,
-      status: connectionStates.inRange,
+      status: connectionStates.none,
     };
     const newServers = [...servers, newServer];
-    setServers(newServers);
+    srvDispatch({
+      type: ActionState.LoadServers,
+      servers: newServers,
+      key: -1,
+    });
     await saveServers(newServers);
-
-    setSelectedServerIP(ip);
-    handleConnection(ip);
   };
 
-  const handleServerSelection = (ip: string) => {
-    setSelectedServerIP(ip);
-    handleConnection(ip);
+  const handleServerSelection = (key: number) => {
+    setSelectedServerKey(key);
   };
 
   const handleServerDeletion = (key: number) => {
     const newServers = servers.splice(key, 1);
-    setServers(newServers);
+    srvDispatch({
+      type: ActionState.LoadServers,
+      servers: newServers,
+      key: -1,
+    });
     saveServers(newServers);
   };
 
   const handleLogin = async () => {
     if (socket?.connected) {
       console.log('logging in');
-      console.log(email);
-      console.log(pwd);
       setLoginState(loginStates.loading);
       setTimeout(
         () => socket?.emit('loginRequest', { email, password: pwd }),
@@ -133,7 +130,12 @@ const LoginView: React.FC = () => {
   useEffect(() => {
     const fetchServersAsync = async () => {
       const temp = await fetchServers();
-      if (temp) setServers(temp);
+      if (temp)
+        srvDispatch({
+          type: ActionState.LoadServers,
+          servers: temp,
+          key: -1,
+        });
     };
     fetchServersAsync();
   }, []);
@@ -146,85 +148,87 @@ const LoginView: React.FC = () => {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'position' : 'padding'}
+      behavior="position"
       style={Background}
+      contentContainerStyle={{ flex: 1 }}
     >
-      <SafeAreaView>
-        <LoginViewContainer>
-          <HeaderText>door_system</HeaderText>
+      <LoginViewContainer>
+        <HeaderText>door_system</HeaderText>
 
-          <ServerScrollView
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={async () => handleRefresh()}
-              />
-            }
-            contentContainerStyle={{ alignItems: 'center' }}
+        <ServerScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={async () => handleRefresh()}
+            />
+          }
+          contentContainerStyle={{ alignItems: 'center' }}
+        >
+          <SecondaryText
+            style={{
+              marginTop: 8,
+              marginBottom: 8,
+            }}
           >
-            <SecondaryText
-              style={{
-                marginTop: 8,
-                marginBottom: 8,
-              }}
-            >
-              Select a server to log into:
-            </SecondaryText>
-            {servers
-              .sort((a, b) => {
-                return b.key - a.key;
-              })
-              .map((element) => {
-                return (
-                  <ServerEntry
-                    key={element.key}
-                    description={element.name}
-                    ip={element.ip}
-                    isSelected={element.ip === selectedServerIP}
-                    onPress={() => handleServerSelection(element.ip)}
-                    onLongPress={() => handleServerDeletion(element.key)}
-                    connectionStatus={element.status}
-                  />
-                );
-              })}
-            <ManualIP connectionHandler={manualIPSelection} />
-          </ServerScrollView>
+            Select a server to log into:
+          </SecondaryText>
+          {servers
+            .sort((a, b) => {
+              return b.key - a.key;
+            })
+            .map((element) => {
+              return (
+                <ServerEntry
+                  key={element.key}
+                  description={element.name}
+                  ip={element.ip}
+                  isSelected={element.key === selectedServerKey}
+                  onPress={() => {
+                    handleServerSelection(element.key);
+                    handleConnection(element.key);
+                  }}
+                  onLongPress={() => handleServerDeletion(element.key)}
+                  connectionStatus={element.status}
+                />
+              );
+            })}
+          <ManualIP connectionHandler={manualIPSelection} />
+        </ServerScrollView>
 
-          <InputContainer>
-            <StyledTextInput
-              ref={emailInputRef}
-              autoCompleteType="email"
-              keyboardType="email-address"
-              placeholder="Email address..."
-              onChangeText={setEmail}
-              editable={loginState === 0}
-            />
-            <StyledTextInput
-              ref={pwdInputRef}
-              autoCompleteType="password"
-              keyboardType="default"
-              secureTextEntry
-              placeholder="Password..."
-              onChangeText={setPwd}
-              editable={loginState === 0}
-            />
-          </InputContainer>
+        <InputContainer>
+          <StyledTextInput
+            ref={emailInputRef}
+            autoCompleteType="email"
+            keyboardType="email-address"
+            placeholder="Email address..."
+            onChangeText={setEmail}
+            editable={loginState === 0}
+          />
+          <StyledTextInput
+            ref={pwdInputRef}
+            autoCompleteType="password"
+            keyboardType="default"
+            secureTextEntry
+            placeholder="Password..."
+            onChangeText={setPwd}
+            editable={loginState === 0}
+          />
+        </InputContainer>
 
-          <ButtonsContainer>
-            <LoginButton onPress={handleLogin} state={loginState} />
-            <CustomizedButton
-              text="Need account?"
-              onPress={() => setModalVisible(true)}
-            />
-          </ButtonsContainer>
-        </LoginViewContainer>
+        <ButtonsContainer>
+          <LoginButton onPress={handleLogin} state={loginState} />
+          <CustomizedButton
+            text="Need account?"
+            onPress={() => setModalVisible(true)}
+          />
+        </ButtonsContainer>
+      </LoginViewContainer>
 
-        {modalVisible && <StyledBlurView blurType="regular" blurAmount={1} />}
-        <AccountModal
-          visible={modalVisible}
-          handleClose={() => setModalVisible(false)}
-        />
-      </SafeAreaView>
+      {isModalVisible && <StyledBlurView blurType="regular" blurAmount={1} />}
+      <AccountModal
+        visible={isModalVisible}
+        handleClose={() => setModalVisible(false)}
+      />
     </KeyboardAvoidingView>
   );
 };
