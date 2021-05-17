@@ -10,13 +10,13 @@
     background-color: #222;
     font-family: "Source Sans Pro", sans-serif;
   }
-  
+
   .table {
-    width: 100%;
+    width: 900px;
     margin-bottom: 20px;
     color: white;
   }
-  
+
   .tableheader{
     display: flex;
     width: 100%;
@@ -24,8 +24,8 @@
     padding: (12px * 1.5) 0;
   }
 
-  .headerItem {
-    flex: 1 1 20%;
+  .tableheader > div {
+    flex: 1 1 17%;
     text-align: center;
     text-transform: uppercase;
     color: white;
@@ -43,8 +43,8 @@
     background: #333;
   }
 
-  .tableData {
-    flex: 1 1 20%;
+  .tableRow > div {
+    flex: 1 1 17%;
     text-align: center;
     padding: 12px;
   }
@@ -62,17 +62,6 @@
     color: #ddd;
   }
   .form {
-    width: 50%;
-    max-width: 500px;
-    text-align: center;
-    flex-direction: column;
-    align-items: center;
-    background-color: #111;
-    padding: 2em;
-  }
-  .addform {
-    border-right: 3px solid #eee;
-    width: 50%;
     max-width: 500px;
     text-align: center;
     flex-direction: column;
@@ -106,8 +95,25 @@
     margin-top: 1em;
   }
 
-  
-  
+  .buttonTable{
+    background: transparent;
+    color: #eee;
+    border: 2px solid #fff;
+    font-size: 8pt;
+    padding: 12px;
+    outline: 0;
+    cursor: pointer;
+    border-radius: 10px;
+  }
+
+
+  .buttonTable:hover{
+    border-radius: 10px;
+    border: 2px solid #fff;
+    border-image: linear-gradient(to right, #11998e, #38ef7d);
+    border-image-slice: 1;
+
+  }
 
   .inputtext:focus {
     padding-bottom: 6px;
@@ -134,4 +140,4 @@
     border-color: #000;
   }
 
-  
+
