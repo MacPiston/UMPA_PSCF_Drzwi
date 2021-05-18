@@ -21,42 +21,11 @@ class Door {
     }
 }
 
-class Permission {
-    constructor(lockID, email) {
-        this.lockID = lockID;
-        this.email = email;
-    }
-}
-
-function getUsersDoors(userEmail) {
-    var doorList = [];
-    var permissionsArray = permissions.filter(function(el) {
-        return el.email == userEmail;
-    });
-    for(const door of doors) {
-        for(const perm of permissionsArray) {
-            if(door.lockID == perm.lockID) {
-                doorList.push(door);
-                break;
-            }
-        }
-    }
-    return doorList;
-}
-
-var server = app.listen(4000, function(){
-    console.log('listening for requests on port 4000,');
+var server = app.listen(4000, function() {
+    console.log('Server is open on port 4000');
 });
 
 var io = socket(server);
-
-
-function sendUsers() {
-    io.on('connection', (socket) => {
-        socket.emit('users', users);
-    });
-    
-}
 
 var mysql = require('mysql');
 var connection = mysql.createConnection({
@@ -66,42 +35,38 @@ var connection = mysql.createConnection({
     database: "door_access"
 });
 
-connection.connect(function (err) {
-    if (err) throw err;
-    connection.query("SELECT * from users", function (error, results, fields) {
-        if (err) throw err;
-        for(const row of results) {
-            users.push(new User(row.email, row.password));
-            console.log(row.email + "-" + row.password);
-        }
-        sendUsers();
-    });
-
-    connection.query("SELECT * from doors", function(error, results, fields) {
-        if(err) throw err;
-        for(const row of results) {
-            doors.push(new Door(row.lockID, row.door_name));
-        }
-        console.log(doors);
-    });
-
-    connection.query("SELECT * from permissions", function(error, results, fields) {
-        if(err) throw err;
-        for(const row of results) {
-            permissions.push(new Permission(row.lockID, row.email));
-        }
-        console.log(permissions);
-        console.log(getUsersDoors("email@email.com"));
-    });
-});
-
-
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
 
 
+connection.connect(function (err) {
+    if (err) throw err;
 
+    connection.query("SELECT * from users", function (error, results, fields) {
+        if (error) throw error;
+
+        for(const row of results) {
+            users.push(new User(row.email, row.password));
+        }
+
+        io.on('connection', (socket) => {
+            socket.on('requestUsers', function() {
+                console.log("users requested");
+                socket.emit('users', users);
+            });
+        });
+        
+    });
+
+    connection.query("SELECT * from doors", function(error, results, fields) {
+        if(error) throw error;
+        for(const row of results) {
+            doors.push(new Door(row.lockID, row.door_name));
+        }
+    });
+
+});
 
 io.on('connection', (socket) => {
     console.log("connection");
@@ -110,15 +75,14 @@ io.on('connection', (socket) => {
         var loginQuery = 'SELECT * from door_access.users WHERE email = "' + data.email + '" AND password = "' + data.password + '"';
         connection.query(loginQuery, function (error, result, field) {
             if (error) {
-                console.log("Login user email=" + data.email + " with password=" + data.password+ ": failed");
+                console.log("Login user email =" + data.email + " with password =" + data.password + ": failed");
                 socket.emit('loginRequestRes', ("false"));
                 throw error;
             }
             if (result.length > 0) {
                 console.log("Login user email=" + data.email + " with password=" + data.password+ ": success");
                 socket.emit('loginRequestRes', ("true"));
-            }
-            else {
+            } else {
                 console.log("Login user email=" + data.email + " with password=" + data.password+ ": failed");
                 socket.emit('loginRequestRes', ("false"));
             }
@@ -143,7 +107,6 @@ io.on('connection', (socket) => {
 
     socket.on('deleteUser', (data) => {
         var deleteQuery = 'DELETE from users where email = "' + data.email + '";';
-
 
         connection.query(deleteQuery, function (err, result, fields) {
             if (err){
@@ -226,10 +189,21 @@ io.on('connection', (socket) => {
     });
 
     socket.on('doorsList', (data) => {
-        console.log("doorsList emited");
-        var doorsList = getUsersDoors(data.email);
-        socket.emit('doors', {doorsList: doorsList});
-        console.log(doorsList);
+        console.log("Doors List emited");
+        var usersDoorsQuery = 'select * from doors WHERE lockID IN (select lockID from permissions WHERE email="'+ data.email +'");';
+        var doorsList = [];
+        connection.query(usersDoorsQuery, function(err, results, fields) {
+            if(err) {
+                console.log("Couldn't get list of doors for user: " + data.email);
+            } else {
+                
+                for(const row of results) {
+                    doorsList.push(new Door(row.lockID, row.door_name));
+                }
+                socket.emit('doors', {doorsList: doorsList});
+                console.log(doorsList);
+            }
+        });
     });
 
     socket.on("editEmail", (data) => {

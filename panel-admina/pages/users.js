@@ -5,31 +5,6 @@ import { useState } from 'react'
 import Popup from './editPopup'
 const io = require("socket.io-client");
 
-var users = [];
-
-const socket = io.connect("http://localhost:4000", {
-    transports: ['websocket'],
-    upgrade: false
-});
-
-socket.on('deleteUserRes', function (data) {
-    if (data.error=="true") {
-        alert('Podano następujący email: ' + data.email + ' \n Usuwanie zakończyło się sukcesem');
-        Main.deleting(data.email);
-    } else {
-        alert('Podano następujący email: ' + data.email + ' \n Usuwanie zakończyło się niepowodzeniem');
-    }
-});
-
-socket.on('addUserRes', function (data) {
-    if (data.error === "true") {
-        alert('Podano następujący email: ' + data.email +' haslo: '+ data.password + '\n Dodanie zakończyło się sukcesem');
-        Main.adding(data.email,data.password);
-    } else {
-        alert('Podano następujący email: ' + data.email +' haslo: '+ data.password + '\n Dodanie zakonczyło się niepowodzeniem');
-    }
-});
-
 class User {
     constructor(email, pass) {
         this.email = email;
@@ -37,7 +12,34 @@ class User {
     }
 }
 
-function userForceUpdate() {
+var users = [];
+
+const socket = io.connect("http://localhost:4000", {
+    transports: ['websocket'],
+    upgrade: false
+});
+
+socket.emit('requestUsers', {});
+
+socket.on('deleteUserRes', function (data) {
+    if (data.error=="true") {
+        alert('Usuwanie zakończyło się sukcesem');
+        Main.deleting(data.email);
+    } else {
+        alert('Usuwanie zakończyło się niepowodzeniem');
+    }
+});
+
+socket.on('addUserRes', function (data) {
+    if (data.error === "true") {
+        alert('Podano następujący email: ' + data.email +' oraz hasło: '+ data.password + '\nDodanie zakończyło się sukcesem');
+        Main.adding(data.email,data.password);
+    } else {
+        alert('Podano następujący email: ' + data.email +' oraz hasło: '+ data.password + '\nDodanie zakonczyło się niepowodzeniem');
+    }
+});
+
+function useForceUpdate() {
     const [value, setValue] = useState(0);
     return () => setValue(value => value + 1);
 }
@@ -75,9 +77,12 @@ function UserTable(props) {
 }
 
 export default function Main() {
-    
-    const [userName, setUserName] = useState("initialValue");
+    const [userName, setUserName] = useState("");
     const [isOpen, setIsOpen] = useState(false);
+    const refresh = useForceUpdate();
+    let emailInputAdd = React.createRef();
+    let passwordInputAdd = React.createRef();
+
     const togglePopup = () => {
         setIsOpen(!isOpen);
     }
@@ -85,17 +90,11 @@ export default function Main() {
     const currentEditUser = (email) => {
         setUserName(email);
     }
-    
-    const refresh = userForceUpdate();
-    let emailInputAdd = React.createRef();
-    let passwordInputAdd = React.createRef();
 
     socket.on('users', function(data) {
-        console.log(data);
         for(const user of data) {
             users.push(new User(user.email, user.password));
         }
-        console.log(users);
         refresh();
     });
 
@@ -114,19 +113,14 @@ export default function Main() {
         refresh();
     }
 
-
     function deleteUser(email) {
-        var index;
         for (let i = 0; i < users.length; i++) {
             if (users[i].email == email) {
-                index = i;
+                socket.emit("deleteUser", {email: email});
+                users.splice(i, 1);
+                refresh();
                 break;
             }
-        }
-        if (index > -1) {
-            socket.emit("deleteUser", {email: email});
-            users.splice(index, 1);
-            refresh();
         }
     }
 
@@ -173,7 +167,6 @@ export default function Main() {
     }
 
     return (
-        <>
         <div className={styles.container}>
             <Head>
                 <title>Users</title>
@@ -194,13 +187,10 @@ export default function Main() {
                     </form>
                 </div>
             </main>
-            
+            {isOpen && <Popup
+            user={userName}
+            handleClose={togglePopup}
+            handleEdit={executeEdit}/> }
         </div>
-        {isOpen && <Popup
-                user={userName}
-                handleClose={togglePopup}
-                handleEdit={executeEdit}/>}
-        </>
     );
-
 }
