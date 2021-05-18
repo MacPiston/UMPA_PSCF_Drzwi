@@ -231,6 +231,32 @@ io.on('connection', (socket) => {
         socket.emit('doors', {doorsList: doorsList});
         console.log(doorsList);
     });
+
+    socket.on("editEmail", (data) => {
+        console.log("editing email");
+        var editEmailQuery = 'UPDATE users SET email = "' + data.newEmail + '" WHERE email="' + data.oldEmail + '";';
+        connection.query(editEmailQuery, function(err){
+            if(err) {
+                console.log("Couldnt update user: " + data.oldEmail + " with new email: " + data.newEmail);
+                throw err;
+            } else {
+                console.log("Successfully updated user with email: " + data.newEmail);
+            }
+        });
+    });
+
+    socket.on("editPassword", (data) => {
+        console.log("editing password");
+        var editPasswordQuery = 'UPDATE users SET password = "' + data.newPassword + '" WHERE email="' + data.email + '";';
+        connection.query(editPasswordQuery, function(err){
+            if(err) {
+                console.log("Couldnt update user: " + data.email + " with new password: " + data.newPassword);
+                throw err;
+            } else {
+                console.log("Successfully updated user with email: " + data.email + " pass: " + data.newPassword);
+            }
+        });
+    });
 });
 
 

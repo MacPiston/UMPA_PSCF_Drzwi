@@ -2,6 +2,7 @@ import Head from 'next/head'
 import React from 'react'
 import styles from '../styles/User.module.css'
 import { useState } from 'react'
+import Popup from './editPopup'
 const io = require("socket.io-client");
 
 var users = [];
@@ -59,13 +60,13 @@ function UserTable(props) {
                     <div>{item.email}</div>
                     <div>{item.password}</div>
                     <div>
-                        <button className={styles.buttonTable} onClick={() => Main.editing(item.email)}>EDIT</button>
+                        <button className={styles.editButtonTable} onClick={() => Main.editing(item.email)}>EDIT</button>
                     </div>
                     <div>
-                        <button className={styles.buttonTable} onClick={() => Main.deleting(item.email)}>DELETE</button>
+                        <button className={styles.deleteButtonTable} onClick={() => Main.deleting(item.email)}>DELETE</button>
                     </div>
                     <div>
-                        <button className={styles.buttonTable} onClick={() => Main.permissions(item.email)}>PERSMISSIONS</button>
+                        <button className={styles.permButtonTable} onClick={() => Main.permissions(item.email)}>PERSMISSIONS</button>
                     </div>
                 </div>
             ))}
@@ -74,6 +75,17 @@ function UserTable(props) {
 }
 
 export default function Main() {
+    
+    const [userName, setUserName] = useState("initialValue");
+    const [isOpen, setIsOpen] = useState(false);
+    const togglePopup = () => {
+        setIsOpen(!isOpen);
+    }
+
+    const currentEditUser = (email) => {
+        setUserName(email);
+    }
+    
     const refresh = userForceUpdate();
     let emailInputAdd = React.createRef();
     let passwordInputAdd = React.createRef();
@@ -110,11 +122,28 @@ export default function Main() {
     }
 
     function editUser(email){
-        alert("edit " + email);
+        currentEditUser(email);
+        togglePopup();
     }
 
     function editPermissions(email){
         alert("permissions " + email);
+    }
+
+    function executeEdit(email, password) {
+        for(var user of users) {
+            if(user.email == userName) {
+                if(password != "") {
+                    user.password = password;
+                    socket.emit("editPassword", {email: userName, newPassword: password});
+                } if(email != "") {
+                    user.email = email;
+                    socket.emit("editEmail", {oldEmail: userName, newEmail: email});
+                } 
+            }
+        }
+        togglePopup();
+        refresh();
     }
 
     Main.adding = addUser;
@@ -131,6 +160,7 @@ export default function Main() {
     }
 
     return (
+        <>
         <div className={styles.container}>
             <Head>
                 <title>Users</title>
@@ -151,7 +181,13 @@ export default function Main() {
                     </form>
                 </div>
             </main>
+            
         </div>
+        {isOpen && <Popup
+                user={userName}
+                handleClose={togglePopup}
+                handleEdit={executeEdit}/>}
+        </>
     );
 
 }
