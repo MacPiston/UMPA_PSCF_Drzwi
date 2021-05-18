@@ -99,6 +99,15 @@ export default function Main() {
         refresh();
     });
 
+    function checkIfNewUserExists(email) {
+        for (let i = 0; i < users.length; i++) {
+            if (users[i].email == email) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function addUser(email, password) {
         var newUser = new User(email, password);
         users.push(newUser);
@@ -154,6 +163,10 @@ export default function Main() {
     function handleSubmitAdd(event) {
         event.preventDefault();
         event.stopPropagation();
+        if(checkIfNewUserExists(emailInputAdd.current.value)) {
+            alert("Użytkownik o podanym emailu już istnieje!");
+            return;
+        }
         socket.emit("addUser", {email: emailInputAdd.current.value, password: passwordInputAdd.current.value});
         emailInputAdd.current.value = '';
         passwordInputAdd.current.value = '';
