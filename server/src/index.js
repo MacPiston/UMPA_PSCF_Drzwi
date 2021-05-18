@@ -136,6 +136,7 @@ io.on('connection', (socket) => {
             else{
                 console.log("Added user:" + data.email + " with password: " + data.password+" : success");
                 socket.emit('addUserRes', ({email: data.email, error: "true",password : data.password}));
+                users.push(new User(data.email, data.password));
             }
         });
     });
@@ -153,6 +154,12 @@ io.on('connection', (socket) => {
             else{
                 console.log("Deleted user:" + data.email+" : success");
                 socket.emit('deleteUserRes', {email: data.email, error: "true"});
+                for(var i = 0; i< users.length; i++) {
+                    if(users[i].email == data.email) {
+                        users.splice(i,1);
+                        break;
+                    }
+                }
             }
         });
     });
