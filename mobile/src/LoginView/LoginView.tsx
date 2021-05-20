@@ -28,13 +28,23 @@ import {
 
 const LoginView: React.FC = () => {
   const { Background } = Styles;
+  const {
+    SetConnected,
+    SetConnecting,
+    SetDisconnected,
+    SetInRange,
+    DisconnectAll,
+    AddServers,
+    DeleteServer,
+    LoadServers,
+  } = ActionState;
   const [email, setEmail] = useState<string>('');
   const [pwd, setPwd] = useState<string>('');
   const emailInputRef = useRef() as React.MutableRefObject<TextInput>;
   const pwdInputRef = useRef() as React.MutableRefObject<TextInput>;
 
   const [fetchServers, saveServers] = useLocalStorage<server[]>('servers');
-  const [selectedServerKey, setSelectedServerKey] = useState<number>(-1);
+  const [selectedServer, setSelectedServer] = useState<server | null>(null);
   const [servers, srvDispatch] = useReducer(serversReducer, []);
 
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
@@ -43,11 +53,37 @@ const LoginView: React.FC = () => {
 
   const [socket, setSocket] = useState<Socket>();
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
+  useEffect(() => {
+    const fetchServersAsync = async () => {
+      const temp = await fetchServers();
+      if (temp)
+        srvDispatch({
+          type: LoadServers,
+          servers: temp,
+        });
+    };
+    fetchServersAsync();
 
+    return () => {
+      if (socket) socket.disconnect();
+      srvDispatch({ type: DisconnectAll });
+    };
+  }, []);
+
+  useEffect(() => {
+    const saveServersAsync = async () => {
+      console.log(servers);
+      await saveServers(servers);
+    };
+    console.log('saving');
+    if (servers) saveServersAsync();
+  }, [servers]);
+
+  const handleRefresh = async () => {
     if (socket) socket.disconnect();
-    setSelectedServerKey(-1);
+
+    setRefreshing(true);
+    setSelectedServer(null);
 
     emailInputRef.current.clear();
     pwdInputRef.current.clear();
@@ -55,21 +91,29 @@ const LoginView: React.FC = () => {
     await setTimeout(() => setRefreshing(false), 1500);
   };
 
-  const handleLoginResponse = async (response: boolean) => {
-    console.log(response);
-    setLoginState(
-      response ? loginStates.loginSuccess : loginStates.loginFailed,
-    );
-    setTimeout(() => setLoginState(loginStates.enabled), 1500);
+  const manualIPSelection = (ip: string) => {
+    const newServer: server[] = [
+      {
+        name: 'nowy '.concat(servers.length.toString()),
+        ip,
+        key: servers.length,
+        status: connectionStates.none,
+      },
+    ];
+    srvDispatch({
+      type: AddServers,
+      servers: newServer,
+    });
   };
 
-  const handleConnection = (key: number) => {
-    if (socket) socket.disconnect();
+  const handleConnection = (passedServer: server) => {
+    const { ip } = passedServer;
+
     setLoginState(loginStates.disabled);
+    if (socket) socket.disconnect();
+
     emailInputRef.current.clear();
     pwdInputRef.current.clear();
-
-    const ip = servers.find((e) => e.key === key)?.ip;
 
     if (ip && ip !== '') {
       const address = 'http://'.concat(ip).concat(':4000');
@@ -78,42 +122,17 @@ const LoginView: React.FC = () => {
       tempsocket.on('connect', () => {
         setSocket(tempsocket);
         setLoginState(loginStates.enabled);
+        srvDispatch({ type: SetConnected, server: passedServer });
       });
-      tempsocket.on('disconnect', () => setLoginState(loginStates.disabled));
+      tempsocket.on('disconnect', () => {
+        setLoginState(loginStates.disabled);
+        srvDispatch({ type: DisconnectAll });
+      });
       tempsocket.on('loginRequestRes', async (data) =>
+        // eslint-disable-next-line no-use-before-define
         handleLoginResponse(data),
       );
     }
-  };
-
-  const manualIPSelection = async (ip: string) => {
-    const newServer: server = {
-      name: 'nowy',
-      ip,
-      key: servers.length,
-      status: connectionStates.none,
-    };
-    const newServers = [...servers, newServer];
-    srvDispatch({
-      type: ActionState.LoadServers,
-      servers: newServers,
-      key: -1,
-    });
-    await saveServers(newServers);
-  };
-
-  const handleServerSelection = (key: number) => {
-    setSelectedServerKey(key);
-  };
-
-  const handleServerDeletion = (key: number) => {
-    const newServers = servers.splice(key, 1);
-    srvDispatch({
-      type: ActionState.LoadServers,
-      servers: newServers,
-      key: -1,
-    });
-    saveServers(newServers);
   };
 
   const handleLogin = async () => {
@@ -127,24 +146,13 @@ const LoginView: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchServersAsync = async () => {
-      const temp = await fetchServers();
-      if (temp)
-        srvDispatch({
-          type: ActionState.LoadServers,
-          servers: temp,
-          key: -1,
-        });
-    };
-    fetchServersAsync();
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (socket) socket.disconnect();
-    };
-  }, []);
+  const handleLoginResponse = async (response: boolean) => {
+    console.log(response);
+    setLoginState(
+      response ? loginStates.loginSuccess : loginStates.loginFailed,
+    );
+    setTimeout(() => setLoginState(loginStates.enabled), 1500);
+  };
 
   return (
     <KeyboardAvoidingView
@@ -172,26 +180,27 @@ const LoginView: React.FC = () => {
           >
             Select a server to log into:
           </SecondaryText>
-          {servers
-            .sort((a, b) => {
-              return b.key - a.key;
-            })
-            .map((element) => {
-              return (
-                <ServerEntry
-                  key={element.key}
-                  description={element.name}
-                  ip={element.ip}
-                  isSelected={element.key === selectedServerKey}
-                  onPress={() => {
-                    handleServerSelection(element.key);
-                    handleConnection(element.key);
-                  }}
-                  onLongPress={() => handleServerDeletion(element.key)}
-                  connectionStatus={element.status}
-                />
-              );
-            })}
+          {servers.map((element) => {
+            return (
+              <ServerEntry
+                key={element.key}
+                description={element.name}
+                ip={element.ip}
+                isSelected={element === selectedServer}
+                onPress={() => {
+                  setSelectedServer(element);
+                  handleConnection(element);
+                }}
+                onLongPress={() =>
+                  srvDispatch({
+                    type: DeleteServer,
+                    server: element,
+                  })
+                }
+                connectionStatus={element.status}
+              />
+            );
+          })}
           <ManualIP connectionHandler={manualIPSelection} />
         </ServerScrollView>
 

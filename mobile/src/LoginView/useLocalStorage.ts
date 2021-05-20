@@ -6,7 +6,7 @@ const useLocalObjStorage = <Type>(
   const fetchObject = async (): Promise<Type> => {
     try {
       const jsonString = await AsyncStorage.getItem('@'.concat(storageKey));
-      console.log(jsonString);
+      // console.log(jsonString);
       return jsonString != null ? JSON.parse(jsonString) : null;
     } catch (e) {
       console.log('asyncstorage error');
@@ -17,7 +17,7 @@ const useLocalObjStorage = <Type>(
   const saveObject = async (object: Type) => {
     try {
       const jsonString = JSON.stringify(object);
-      console.log(jsonString);
+      // console.log(jsonString);
       await AsyncStorage.setItem('@'.concat(storageKey), jsonString);
     } catch (e) {
       console.log(e);

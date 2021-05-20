@@ -10,6 +10,7 @@ import {
 } from './ServerEntry.Components';
 import { Colors } from '../Stylesheets/Stylesheets';
 import { connectionStates } from '../ServersReducer';
+
 interface EntryProps {
   ip: string;
   description: string;

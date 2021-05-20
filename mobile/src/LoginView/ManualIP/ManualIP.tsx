@@ -3,7 +3,7 @@ import { SecondaryText, StyledTextInput } from '../LoginView.Components';
 import {
   ViewContainerVertical,
   InputContainerHorizontal,
-  ConnectIcon,
+  IconButton,
 } from './ManualIP.Components';
 
 interface ManualIPProps {
@@ -27,7 +27,7 @@ const ManualIP: React.FC<ManualIPProps> = ({
           placeholder="Server's IP"
           onChangeText={setAddress}
         />
-        <ConnectIcon onPress={() => connectionHandler(address)} />
+        <IconButton onPress={() => connectionHandler(address)} />
       </InputContainerHorizontal>
     </ViewContainerVertical>
   );
