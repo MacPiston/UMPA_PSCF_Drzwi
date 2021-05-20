@@ -3,6 +3,8 @@ import styles from '../styles/User.module.css'
 import React from "react";
 const io = require("socket.io-client");
 import { useRouter } from 'next/router'
+import {useState } from 'react';
+import Login from './login';
 
 var users = [];
 
@@ -50,6 +52,23 @@ function UserTable(props) {
 }
 
 export default function Main() {
+    const [login, setLogin] = useState(true);
+  
+    const loginUser = () => {
+            socket.emit("isLoggedIn", {});
+            socket.on("isLoggedInResponse", (data) => {
+            console.log("login");
+            console.log(data.isLoggedIn);
+            setLogin(data.isLoggedIn);
+            return data.isLoggedIn;
+        });
+    }
+
+    loginUser();
+
+    if(!login) {
+        return <Login setLogin={setLogin} />
+    }
     const router = useRouter();
 
     function goToPermissions(email) {
