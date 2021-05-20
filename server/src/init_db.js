@@ -72,4 +72,23 @@ connection.query('insert ignore into permissions (lockID, email) values ("192.1.
     console.log("permission data #2 added.");
 });
 
+//-----------------------------------------------------------------------------------------------------
+
+connection.query("CREATE TABLE IF NOT EXISTS `door_access`.`admins` (`login` VARCHAR(30) NOT NULL, `password` VARCHAR(45) NOT NULL, PRIMARY KEY (`login`)) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8 COLLATE = utf8_polish_ci; ", function (err) {
+    if (err) throw err;
+    console.log("Admins data table has been created.");
+});
+
+connection.query('insert ignore into admins(login, password) values("admin", "admin");', function (err) {
+    if (err) throw err;
+    console.log("admin data #1 added.");
+});
+
+connection.query('insert ignore into admins(login, password) values("root", "root");', function (err) {
+    if (err) throw err;
+    console.log("admin data #1 added.");
+});
+
+
+
 connection.end();

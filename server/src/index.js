@@ -1,7 +1,11 @@
 const express = require('express');
 const socket = require("socket.io");
+const cors = require('cors');
 
 const app = express();
+app.use(cors());
+
+var isLoggedIn = false;
 
 var users = [];
 var doors = [];
@@ -71,6 +75,27 @@ connection.connect(function (err) {
 io.on('connection', (socket) => {
     console.log("connection");
     
+    socket.on('isLoggedIn', (data) => {
+        socket.emit('isLoggedInResponse', {isLoggedIn: isLoggedIn});
+    });
+
+    socket.on('adminLoginRequest', (data) => {
+        console.log("Admin Login Request: ");
+        console.log(data);
+        let adminLoginQuery = 'SELECT * from admins WHERE login="' + data.userName + '" AND password = "' + data.password + '";';
+        var response = false;
+        connection.query(adminLoginQuery, function(error, results, field) {
+            if(error) {
+                throw error;
+            } if(results.length > 0) {
+                isLoggedIn = true;
+                response = true;
+            }
+            socket.emit('adminLoginResponse', {response: response});
+        });
+        
+    });
+
     socket.on('loginRequest', (data) => {
         var loginQuery = 'SELECT * from door_access.users WHERE email = "' + data.email + '" AND password = "' + data.password + '"';
         connection.query(loginQuery, function (error, result, field) {

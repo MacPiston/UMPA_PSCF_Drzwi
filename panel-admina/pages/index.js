@@ -1,9 +1,34 @@
 import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 import { useRouter } from 'next/router'
+import Login from './login';
+import {useState} from 'react';
 
+const io = require("socket.io-client");
+const socket = io.connect("http://localhost:4000", {
+    transports: ['websocket'],
+    upgrade: false
+});
 
 export default function Home() {
+  const [login, setLogin] = useState(true);
+  
+  const loginUser = () => {
+    socket.emit("isLoggedIn", {});
+    socket.on("isLoggedInResponse", (data) => {
+      console.log("login");
+      console.log(data.isLoggedIn);
+      setLogin(data.isLoggedIn);
+      return data.isLoggedIn;
+    });
+  }
+
+  loginUser();
+
+  if(!login) {
+    return <Login setLogin={setLogin} />
+  }
+
   const router = useRouter();
 
   const usersClick = (e) => {

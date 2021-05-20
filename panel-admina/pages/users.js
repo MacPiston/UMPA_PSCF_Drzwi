@@ -3,6 +3,7 @@ import React from 'react'
 import styles from '../styles/User.module.css'
 import { useState } from 'react'
 import Popup from './editPopup'
+import Login from './login';
 const io = require("socket.io-client");
 
 class User {
@@ -82,6 +83,24 @@ export default function Main() {
     const refresh = useForceUpdate();
     let emailInputAdd = React.createRef();
     let passwordInputAdd = React.createRef();
+
+    const [login, setLogin] = useState(true);
+  
+  const loginUser = () => {
+    socket.emit("isLoggedIn", {});
+    socket.on("isLoggedInResponse", (data) => {
+      console.log("login");
+      console.log(data.isLoggedIn);
+      setLogin(data.isLoggedIn);
+      return data.isLoggedIn;
+    });
+  }
+
+  loginUser();
+
+  if(!login) {
+    return <Login setLogin={setLogin} />
+  }
 
     const togglePopup = () => {
         setIsOpen(!isOpen);
