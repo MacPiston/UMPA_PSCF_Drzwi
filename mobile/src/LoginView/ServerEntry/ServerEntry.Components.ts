@@ -1,9 +1,9 @@
-import { Text, View } from 'react-native';
+import { Text, View, Pressable } from 'react-native';
 import styled from 'styled-components';
 import Icon from 'react-native-vector-icons/AntDesign';
 import { Shadows, Colors } from '../Stylesheets/Stylesheets';
 
-export const EntryContainer = styled(View)`
+export const EntryContainer = styled(Pressable)`
   margin-top: -0.5px;
 
   height: 80px;
@@ -39,7 +39,7 @@ export const PrimaryText = styled(Text)`
 
 export const SecondaryText = styled(Text)`
   flex: 1;
-  font-size: 21px;
+  font-size: 22px;
   padding-bottom: 12px;
   /* border: 1px solid black; */
   color: ${Colors.Font};

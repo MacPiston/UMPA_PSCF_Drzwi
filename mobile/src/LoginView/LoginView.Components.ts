@@ -5,11 +5,12 @@ import styled from 'styled-components';
 import { Shadows, Colors } from './Stylesheets/Stylesheets';
 
 export const LoginViewContainer = styled(View)`
-  display: flex;
-  height: 100%;
+  flex: 1;
   width: 100%;
+  display: flex;
   flex-direction: column;
   align-items: center;
+  /* border: 1px solid black; */
 `;
 
 export const HeaderText = styled(Text)`
@@ -64,7 +65,7 @@ export const StyledTextInput = styled(TextInput).attrs({
 export const ButtonsContainer = styled(View)`
   flex: 2;
   width: 100%;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   display: flex;
   flex-direction: column;
   /* border: 1px solid black; */

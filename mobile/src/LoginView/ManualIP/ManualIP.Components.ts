@@ -21,12 +21,12 @@ export const InputContainerHorizontal = styled(View)`
   /* border: 1px solid white; */
 `;
 
-export const ConnectIcon = styled(Icon).attrs({
-  name: 'sync',
+export const IconButton = styled(Icon).attrs({
+  name: 'plus',
 })`
   flex: 1;
   color: ${Colors.Accent};
-  font-size: 30px;
+  font-size: 36px;
   align-self: center;
   margin-left: 4px;
 `;

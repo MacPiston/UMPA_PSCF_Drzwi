@@ -9,27 +9,24 @@ import {
   CheckIcon,
 } from './ServerEntry.Components';
 import { Colors } from '../Stylesheets/Stylesheets';
+import { connectionStates } from '../ServersReducer';
 
-export const connectionStates = {
-  none: 0,
-  inRange: 1,
-  connecting: 2,
-  connected: 3,
-};
 interface EntryProps {
   ip: string;
   description: string;
-  connectionStatus?: number;
-  isSelected?: boolean;
-  onPress?: () => void;
+  connectionStatus: number;
+  isSelected: boolean;
+  onPress: () => void;
+  onLongPress: () => void;
 }
 
-export const ServerEntry: React.FC<EntryProps> = ({
+const ServerEntry: React.FC<EntryProps> = ({
   ip,
   description,
   isSelected,
   onPress,
   connectionStatus = connectionStates.none,
+  onLongPress,
 }: EntryProps) => {
   const switchIcon = () => {
     switch (connectionStatus) {
@@ -46,7 +43,7 @@ export const ServerEntry: React.FC<EntryProps> = ({
   };
 
   return (
-    <EntryContainer onTouchStart={onPress}>
+    <EntryContainer onPress={onPress} onLongPress={onLongPress}>
       <CheckIcon
         name="check"
         color={isSelected ? 'lightblue' : 'transparent'}
@@ -70,3 +67,5 @@ export const ServerEntry: React.FC<EntryProps> = ({
     </EntryContainer>
   );
 };
+
+export default ServerEntry;

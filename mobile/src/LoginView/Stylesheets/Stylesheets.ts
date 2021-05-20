@@ -3,8 +3,10 @@ import { StyleSheet } from 'react-native';
 
 export const Styles = StyleSheet.create({
   Background: {
-    height: '100%',
-    width: '100%',
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
     backgroundColor: '#373838',
   },
 });
@@ -15,6 +17,7 @@ export const Colors = {
   Alert: '#fc7e00',
   Gray: '#8f8f8f',
   Green: '#1abd46',
+  Red: '#e30505',
 };
 
 export const Shadows = {
