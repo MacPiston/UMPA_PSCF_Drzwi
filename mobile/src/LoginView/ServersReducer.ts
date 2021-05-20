@@ -58,44 +58,38 @@ export const serversReducer = (
   switch (type) {
     case DisconnectAll:
       newState.forEach((_, i, array) => {
+        // eslint-disable-next-line no-param-reassign
         array[i].status = none;
       });
       return newState;
 
     case SetDisconnected:
-      console.log('setting disconnected');
       newState[index].status = none;
       return newState;
 
     case SetInRange:
-      console.log('setting inrange');
       newState[index].status = inRange;
       return newState;
 
     case SetConnecting:
-      console.log('setting connecting');
       newState[index].status = connecting;
       return newState;
 
     case SetConnected:
-      console.log('setting connected');
       newState[index].status = connected;
       return newState;
 
     case AddServers:
-      console.log('adding server');
       if (servers) {
         return newState.concat(servers);
       }
       return newState;
 
     case LoadServers:
-      console.log('loading servers');
       if (servers) return servers;
       return [];
 
     case DeleteServer:
-      console.log('deleting server');
       if (server) {
         if (index === 0) newState.shift();
         else newState.splice(index - 1, 1);

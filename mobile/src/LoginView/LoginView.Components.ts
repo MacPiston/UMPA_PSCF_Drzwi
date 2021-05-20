@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import { Shadows, Colors } from './Stylesheets/Stylesheets';
 
 export const LoginViewContainer = styled(View)`
-  width: 100%;
   flex: 1;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;

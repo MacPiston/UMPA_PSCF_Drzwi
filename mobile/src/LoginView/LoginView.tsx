@@ -1,6 +1,12 @@
 /* eslint-disable global-require */
 import React, { useEffect, useReducer, useRef, useState } from 'react';
-import { RefreshControl, KeyboardAvoidingView, TextInput } from 'react-native';
+import {
+  RefreshControl,
+  KeyboardAvoidingView,
+  TextInput,
+  ScrollView,
+  View,
+} from 'react-native';
 import { io, Socket } from 'socket.io-client';
 import { Styles } from './Stylesheets/Stylesheets';
 import {
@@ -30,9 +36,6 @@ const LoginView: React.FC = () => {
   const { Background } = Styles;
   const {
     SetConnected,
-    SetConnecting,
-    SetDisconnected,
-    SetInRange,
     DisconnectAll,
     AddServers,
     DeleteServer,
@@ -72,10 +75,8 @@ const LoginView: React.FC = () => {
 
   useEffect(() => {
     const saveServersAsync = async () => {
-      console.log(servers);
       await saveServers(servers);
     };
-    console.log('saving');
     if (servers) saveServersAsync();
   }, [servers]);
 
@@ -92,18 +93,20 @@ const LoginView: React.FC = () => {
   };
 
   const manualIPSelection = (ip: string) => {
-    const newServer: server[] = [
-      {
-        name: 'nowy '.concat(servers.length.toString()),
-        ip,
-        key: servers.length,
-        status: connectionStates.none,
-      },
-    ];
-    srvDispatch({
-      type: AddServers,
-      servers: newServer,
-    });
+    if (ip !== '') {
+      const newServer: server[] = [
+        {
+          name: 'nowy '.concat(servers.length.toString()),
+          ip,
+          key: servers.length,
+          status: connectionStates.none,
+        },
+      ];
+      srvDispatch({
+        type: AddServers,
+        servers: newServer,
+      });
+    }
   };
 
   const handleConnection = (passedServer: server) => {
@@ -159,85 +162,90 @@ const LoginView: React.FC = () => {
       behavior="position"
       style={Background}
       contentContainerStyle={{ flex: 1 }}
+      keyboardVerticalOffset={-100}
     >
-      <LoginViewContainer>
-        <HeaderText>door_system</HeaderText>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <LoginViewContainer>
+          <HeaderText>door_system</HeaderText>
 
-        <ServerScrollView
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefreshing}
-              onRefresh={async () => handleRefresh()}
-            />
-          }
-          contentContainerStyle={{ alignItems: 'center' }}
-        >
-          <SecondaryText
-            style={{
-              marginTop: 8,
-              marginBottom: 8,
-            }}
-          >
-            Select a server to log into:
-          </SecondaryText>
-          {servers.map((element) => {
-            return (
-              <ServerEntry
-                key={element.key}
-                description={element.name}
-                ip={element.ip}
-                isSelected={element === selectedServer}
-                onPress={() => {
-                  setSelectedServer(element);
-                  handleConnection(element);
-                }}
-                onLongPress={() =>
-                  srvDispatch({
-                    type: DeleteServer,
-                    server: element,
-                  })
-                }
-                connectionStatus={element.status}
+          <ServerScrollView
+            refreshControl={
+              // eslint-disable-next-line react/jsx-wrap-multilines
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={async () => handleRefresh()}
               />
-            );
-          })}
-          <ManualIP connectionHandler={manualIPSelection} />
-        </ServerScrollView>
+            }
+            contentContainerStyle={{ alignItems: 'center' }}
+          >
+            <SecondaryText
+              style={{
+                marginTop: 8,
+                marginBottom: 8,
+              }}
+            >
+              Select a server to log into:
+            </SecondaryText>
+            {servers.map((element) => {
+              return (
+                <ServerEntry
+                  key={element.key}
+                  description={element.name}
+                  ip={element.ip}
+                  isSelected={element === selectedServer}
+                  onPress={() => {
+                    setSelectedServer(element);
+                    handleConnection(element);
+                  }}
+                  onLongPress={() =>
+                    srvDispatch({
+                      type: DeleteServer,
+                      server: element,
+                    })
+                  }
+                  connectionStatus={element.status}
+                />
+              );
+            })}
+            <ManualIP connectionHandler={manualIPSelection} />
+          </ServerScrollView>
 
-        <InputContainer>
-          <StyledTextInput
-            ref={emailInputRef}
-            autoCompleteType="email"
-            keyboardType="email-address"
-            placeholder="Email address..."
-            onChangeText={setEmail}
-            editable={loginState === 0}
-          />
-          <StyledTextInput
-            ref={pwdInputRef}
-            autoCompleteType="password"
-            keyboardType="default"
-            secureTextEntry
-            placeholder="Password..."
-            onChangeText={setPwd}
-            editable={loginState === 0}
-          />
-        </InputContainer>
+          <InputContainer>
+            <StyledTextInput
+              ref={emailInputRef}
+              autoCompleteType="email"
+              keyboardType="email-address"
+              placeholder="Email address..."
+              onChangeText={setEmail}
+              editable={loginState === 0}
+            />
+            <StyledTextInput
+              ref={pwdInputRef}
+              autoCompleteType="password"
+              keyboardType="default"
+              secureTextEntry
+              placeholder="Password..."
+              onChangeText={setPwd}
+              editable={loginState === 0}
+            />
+          </InputContainer>
 
-        <ButtonsContainer>
-          <LoginButton onPress={handleLogin} state={loginState} />
-          <CustomizedButton
-            text="Need account?"
-            onPress={() => setModalVisible(true)}
+          <ButtonsContainer>
+            <LoginButton onPress={handleLogin} state={loginState} />
+            <CustomizedButton
+              text="Need account?"
+              onPress={() => setModalVisible(true)}
+            />
+          </ButtonsContainer>
+          {isModalVisible && (
+            <StyledBlurView blurType="regular" blurAmount={1} />
+          )}
+          <AccountModal
+            visible={isModalVisible}
+            handleClose={() => setModalVisible(false)}
           />
-        </ButtonsContainer>
-      </LoginViewContainer>
-
-      {isModalVisible && <StyledBlurView blurType="regular" blurAmount={1} />}
-      <AccountModal
-        visible={isModalVisible}
-        handleClose={() => setModalVisible(false)}
-      />
+        </LoginViewContainer>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };
