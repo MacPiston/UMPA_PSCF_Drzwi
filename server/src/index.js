@@ -256,6 +256,24 @@ io.on('connection', (socket) => {
             }
         });
     });
+
+    socket.on("fullDoorsListRequest", (data) => {
+        var doorsListQuery = "SELECT * from doors";
+        connection.query(doorsListQuery, function(err, results, fields) {
+            if(err) {
+                console.log("Couldn't get doors list");
+                throw err;
+            } else {
+                var newDoorsList = [];
+                for(const row of results) {
+                    newDoorsList.push(new Door(row.lockID, row.door_name));
+                }
+                socket.emit("fullDoorsListResponse", {doorsList: newDoorsList});
+                console.log("popup");
+                console.log(newDoorsList);
+            }
+        });
+    });
 });
 
 

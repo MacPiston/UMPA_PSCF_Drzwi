@@ -1,8 +1,9 @@
-import Head from 'next/head'
-import React from 'react'
-import styles from '../styles/User.module.css'
-import { useState } from 'react'
-import Popup from './editPopup'
+import Head from 'next/head';
+import React from 'react';
+import styles from '../styles/User.module.css';
+import { useState } from 'react';
+import Popup from './editPopup';
+import PermissionPopup from './userPermissionsModal';
 import Login from './login';
 const io = require("socket.io-client");
 
@@ -13,7 +14,16 @@ class User {
     }
 }
 
+class Door {
+    constructor(lockID, doorName) {
+        this.lockID = lockID;
+        this.doorName = doorName;
+    }
+}
+
 var users = [];
+var doors = [];
+var permissions = [];
 
 const socket = io.connect("http://localhost:4000", {
     transports: ['websocket'],
@@ -38,6 +48,24 @@ socket.on('addUserRes', function (data) {
     } else {
         alert('Podano następujący email: ' + data.email +' oraz hasło: '+ data.password + '\nDodanie zakonczyło się niepowodzeniem');
     }
+});
+
+socket.on('fullDoorsListResponse', function(data) {
+    doors = [];
+    console.log("responsepopup");
+    for(const door of data.doorsList) {
+        doors.push(new Door(door.lockID, door.doorName));
+    }
+    socket.emit('doorsList', {email: Main.userName});
+    
+});
+
+socket.on('doors', function(data){
+    permissions = [];
+    for(const door of data.doorsList) {
+        permissions.push(new Door(door.lockID, door.doorName));
+    }
+    Main.togglePermModal();
 });
 
 function useForceUpdate() {
@@ -80,12 +108,14 @@ function UserTable(props) {
 export default function Main() {
     const [userName, setUserName] = useState("");
     const [isOpen, setIsOpen] = useState(false);
+    const [isOpenPermissionModal, setIsOpenModal] = useState(false);
     const refresh = useForceUpdate();
     let emailInputAdd = React.createRef();
     let passwordInputAdd = React.createRef();
 
     const [login, setLogin] = useState(true);
-  
+
+    Main.userName = userName;
   const loginUser = () => {
     socket.emit("isLoggedIn", {});
     socket.on("isLoggedInResponse", (data) => {
@@ -101,6 +131,10 @@ export default function Main() {
   if(!login) {
     return <Login setLogin={setLogin} />
   }
+
+    const togglePermissionsModal = () => {
+        setIsOpenModal(!isOpenPermissionModal);
+    }
 
     const togglePopup = () => {
         setIsOpen(!isOpen);
@@ -145,11 +179,13 @@ export default function Main() {
 
     function editUser(email){
         currentEditUser(email);
+        
         togglePopup();
     }
 
     function editPermissions(email){
-        alert("permissions " + email);
+        currentEditUser(email);
+        socket.emit("fullDoorsListRequest", {});
     }
 
     function executeEdit(email, password) {
@@ -172,15 +208,24 @@ export default function Main() {
     Main.deleting = deleteUser;
     Main.editing = editUser;
     Main.permissions = editPermissions;
+    Main.togglePermModal = togglePermissionsModal;
 
     function handleSubmitAdd(event) {
         event.preventDefault();
         event.stopPropagation();
-        if(checkIfNewUserExists(emailInputAdd.current.value)) {
+        let email = emailInputAdd.current.value;
+        let password = passwordInputAdd.current.value;
+
+        if(email == '' || password == '') {
+            alert("Wypełnij wszystkie pola!");
+            return;
+        }
+
+        if(checkIfNewUserExists(email)) {
             alert("Użytkownik o podanym emailu już istnieje!");
             return;
         }
-        socket.emit("addUser", {email: emailInputAdd.current.value, password: passwordInputAdd.current.value});
+        socket.emit("addUser", {email: email, password: password});
         emailInputAdd.current.value = '';
         passwordInputAdd.current.value = '';
     }
@@ -210,6 +255,13 @@ export default function Main() {
             user={userName}
             handleClose={togglePopup}
             handleEdit={executeEdit}/> }
+
+            {isOpenPermissionModal && <PermissionPopup 
+            user={userName}
+            doorsList={doors}
+            permissionList={permissions}
+            handleSave={togglePermissionsModal}
+            handleCancel={togglePermissionsModal} />}
         </div>
     );
 }
