@@ -119,8 +119,6 @@ export default function Main() {
   const loginUser = () => {
     socket.emit("isLoggedIn", {});
     socket.on("isLoggedInResponse", (data) => {
-      console.log("login");
-      console.log(data.isLoggedIn);
       setLogin(data.isLoggedIn);
       return data.isLoggedIn;
     });
@@ -261,7 +259,8 @@ export default function Main() {
             doorsList={doors}
             permissionList={permissions}
             handleSave={togglePermissionsModal}
-            handleCancel={togglePermissionsModal} />}
+            handleCancel={togglePermissionsModal}
+            socket={socket} />}
         </div>
     );
 }

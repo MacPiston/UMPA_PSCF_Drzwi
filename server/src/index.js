@@ -274,6 +274,28 @@ io.on('connection', (socket) => {
             }
         });
     });
+
+    socket.on("addPermissions", (data) => {
+        for(const perm of data.addQueries) {
+            var addPermisQuery = 'insert ignore into permissions (lockID, email) values ("' + perm.lockID + 
+            '", "' + perm.email + '");';
+            connection.query(addPermisQuery, function(err) {
+                if (err) throw err;
+                console.log("permission data added");
+            });
+        }
+    });
+
+    socket.on("deletePermissions", (data) => {
+        for(const perm of data.deleteQueries) {
+            
+            var deletePermisQuery = 'DELETE from permissions where email = "' + perm.email + '" AND lockID="' + perm.lockID + '";';
+            connection.query(deletePermisQuery, function(err) {
+                if (err) throw err;
+                console.log("permission data removed");
+            });
+        }
+    });
 });
 
 
