@@ -246,6 +246,23 @@ io.on('connection', (socket) => {
         });
     });
 
+    socket.on('userDoorList', (data) => {
+        console.log("User door List emited");
+        var usersDoorsQuery = 'select * from users WHERE email IN (select email from permissions WHERE lockID="'+ data.lockID +'");';
+        var usersList = [];
+        connection.query(usersDoorsQuery, function(err, results, fields) {
+            if(err) {
+                console.log("Couldn't get list of users for doors: " + data.lockID);
+            } else {
+                for(const row of results) {
+                    usersList.push(new User(row.email, row.password));
+                }
+                socket.emit('userDoorListRes', usersList);
+                console.log(usersList);
+            }
+        });
+    });
+
     socket.on("editLockId", (data) => {
         console.log("editing lockID");
         var editLockIDQuery = 'UPDATE doors SET lockID = "' + data.newLockID + '" WHERE lockID="' + data.oldLockID + '";';
