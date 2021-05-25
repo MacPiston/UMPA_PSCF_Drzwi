@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   LayoutAnimation,
@@ -7,23 +7,63 @@ import {
   ScrollView,
   Pressable,
 } from 'react-native';
-// import io from 'socket.io-client';
+import { io } from 'socket.io-client';
 import Icon from 'react-native-vector-icons/Feather';
 import { styles } from './Stylesheets/Stylesheets';
 import ExpandableItem from './ExpandableItem';
 
+interface Door {
+  doorName: string;
+  lockID: string;
+  inBtRange: boolean;
+  isExpanded: boolean;
+}
+
 const DoorsView = () => {
-  const [listDataSource, setListDataSource] = useState(DATA);
+  const [doorList, setDoorList] = useState<Door[]>();
+
+  // TODO Do usunięcia pozostałości z testowania
+  const socket = io('http://10.0.2.2:4000');
+
+  const logindata = {
+    email: 'test@gmail.com',
+  };
+  //----------------------------------------------------
+
+  const refreshDoorList = () => {
+    socket.emit('doorsList', logindata);
+  };
+  useEffect(() => {
+    refreshDoorList();
+  }, []);
+
+  const logOut = () => {
+    socket.disconnect();
+    //TODO powrót do widoku logowania
+  };
+
+  socket.on('doors', (elem) => {
+    const array = elem.doorsList.map(
+      (item) =>
+        ({
+          doorName: item.doorName,
+          lockID: item.lockID,
+          inBtRange: false,
+          isExpanded: false,
+        } as Door),
+    );
+    setDoorList(array);
+  });
 
   const updateLayout = (index) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    const array = [...listDataSource];
+    const array = [...doorList];
     array.map((value, placeindex) =>
       placeindex === index
         ? (array[placeindex]['isExpanded'] = !array[placeindex]['isExpanded'])
         : (array[placeindex]['isExpanded'] = false),
     );
-    setListDataSource(array);
+    setDoorList(array);
   };
 
   return (
@@ -32,26 +72,30 @@ const DoorsView = () => {
         <Pressable
           onPress={() => {
             alert('Zostałeś wylogowany');
-            console.log('You have been logged out');
+            logOut();
+            console.log('User is logged out');
           }}
         >
-          <Icon name="log-out" style={styles.headerButton}></Icon>
+          <Icon name="log-out" style={styles.headerButton} />
         </Pressable>
         <Text style={styles.headerText}>Dostępne drzwi</Text>
         <Pressable
-          onPress={() => console.log('Available doors list has been refreshed')}
+          onPress={() => {
+            console.log('Available doors list has been refreshed');
+            refreshDoorList();
+          }}
         >
-          <Icon name="refresh-ccw" style={styles.headerButton}></Icon>
+          <Icon name="refresh-ccw" style={styles.headerButton} />
         </Pressable>
       </View>
       <ScrollView>
-        {listDataSource.map((item, key) => (
+        {doorList?.map((door, key) => (
           <ExpandableItem
-            key={item.room_name}
+            key={door.doorName}
             onPressFunction={() => {
               updateLayout(key);
             }}
-            item={item}
+            item={door}
           />
         ))}
       </ScrollView>
@@ -60,76 +104,3 @@ const DoorsView = () => {
 };
 
 export default DoorsView;
-
-const DATA = [
-  {
-    isExpanded: false,
-    room_name: '101',
-    inBtRange: true,
-  },
-  {
-    isExpanded: false,
-    room_name: '102',
-    inBtRange: false,
-  },
-  {
-    isExpanded: false,
-    room_name: '103',
-    inBtRange: false,
-  },
-  {
-    isExpanded: false,
-    room_name: '201',
-    inBtRange: false,
-  },
-  {
-    isExpanded: false,
-    room_name: '202',
-    inBtRange: false,
-  },
-  {
-    isExpanded: false,
-    room_name: '203',
-    inBtRange: true,
-  },
-  {
-    isExpanded: false,
-    room_name: '204',
-    inBtRange: false,
-  },
-  {
-    isExpanded: false,
-    room_name: '301',
-    inBtRange: false,
-  },
-  {
-    isExpanded: false,
-    room_name: '302',
-    inBtRange: false,
-  },
-  {
-    isExpanded: false,
-    room_name: '303',
-    inBtRange: false,
-  },
-  {
-    isExpanded: false,
-    room_name: 'Serwerownia',
-    inBtRange: true,
-  },
-  {
-    isExpanded: false,
-    room_name: 'Gabinet Prezesa',
-    inBtRange: true,
-  },
-  {
-    isExpanded: false,
-    room_name: 'Pomieszczenie gospodarcze 111',
-    inBtRange: false,
-  },
-  {
-    isExpanded: false,
-    room_name: 'Pomieszczenie gospodarcze 311',
-    inBtRange: false,
-  },
-];

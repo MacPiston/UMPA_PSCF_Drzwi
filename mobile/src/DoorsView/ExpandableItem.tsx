@@ -25,7 +25,7 @@ const ExpandableItem = ({ item, onPressFunction }) => {
           item.inBtRange ? styles.inRangeColor : styles.outOfRangeColor,
         ]}
       >
-        <Text style={styles.accordionHeaderText}>{item.room_name}</Text>
+        <Text style={styles.accordionHeaderText}>{item.doorName}</Text>
       </TouchableOpacity>
       <View
         style={{
@@ -39,8 +39,8 @@ const ExpandableItem = ({ item, onPressFunction }) => {
           style={styles.accordionListElement}
           onPress={() =>
             item.inBtRange
-              ? alert('Otwarto ' + item.room_name)
-              : alert(item.room_name + ' nie są w zasięgu')
+              ? alert('Otwarto ' + item.doorName)
+              : alert(item.doorName + ' nie są w zasięgu')
           }
         >
           <Text style={styles.accordionListElementText}>Otwórz drzwi</Text>
