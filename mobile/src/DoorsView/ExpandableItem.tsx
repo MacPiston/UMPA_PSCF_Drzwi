@@ -40,7 +40,7 @@ const ExpandableItem = ({ item, onPressFunction }) => {
           onPress={() =>
             item.inBtRange
               ? alert('Otwarto ' + item.doorName)
-              : alert(item.doorName + ' nie są w zasięgu')
+              : alert(item.doorName + ' nie jest w zasięgu')
           }
         >
           <Text style={styles.accordionListElementText}>Otwórz drzwi</Text>

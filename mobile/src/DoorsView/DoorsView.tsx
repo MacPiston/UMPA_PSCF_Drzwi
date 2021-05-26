@@ -19,19 +19,11 @@ interface Door {
   isExpanded: boolean;
 }
 
-const DoorsView = () => {
+const DoorsView = ({ socket, email }) => {
   const [doorList, setDoorList] = useState<Door[]>();
 
-  // TODO Do usunięcia pozostałości z testowania
-  const socket = io('http://10.0.2.2:4000');
-
-  const logindata = {
-    email: 'test@gmail.com',
-  };
-  //----------------------------------------------------
-
   const refreshDoorList = () => {
-    socket.emit('doorsList', logindata);
+    socket.emit('doorsList', { email });
   };
   useEffect(() => {
     refreshDoorList();
@@ -42,8 +34,8 @@ const DoorsView = () => {
     //TODO powrót do widoku logowania
   };
 
-  socket.on('doors', (elem) => {
-    const array = elem.doorsList.map(
+  socket.on('doors', (data) => {
+    const array = data.doorsList.map(
       (item) =>
         ({
           doorName: item.doorName,
