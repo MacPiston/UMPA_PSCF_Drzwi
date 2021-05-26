@@ -7,10 +7,12 @@ import {
   ScrollView,
   Pressable,
 } from 'react-native';
-import { io } from 'socket.io-client';
 import Icon from 'react-native-vector-icons/Feather';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RouteProp, useRoute } from '@react-navigation/core';
 import { styles } from './Stylesheets/Stylesheets';
 import ExpandableItem from './ExpandableItem';
+import { DoorsScreenRouteProp, MainStackParams } from '../Navigation/Params';
 
 interface Door {
   doorName: string;
@@ -19,8 +21,12 @@ interface Door {
   isExpanded: boolean;
 }
 
-const DoorsView = ({ socket, email }) => {
+type doorsScreenProp = StackNavigationProp<MainStackParams, 'Doors'>;
+
+const DoorsView: React.FC = () => {
   const [doorList, setDoorList] = useState<Door[]>();
+  // const navigation = useNavigation<doorsScreenProp>();
+  const { socket, email } = useRoute<DoorsScreenRouteProp>();
 
   const refreshDoorList = () => {
     socket.emit('doorsList', { email });
@@ -31,7 +37,7 @@ const DoorsView = ({ socket, email }) => {
 
   const logOut = () => {
     socket.disconnect();
-    //TODO powrót do widoku logowania
+    // TODO powrót do widoku logowania
   };
 
   socket.on('doors', (data) => {
@@ -52,8 +58,8 @@ const DoorsView = ({ socket, email }) => {
     const array = [...doorList];
     array.map((value, placeindex) =>
       placeindex === index
-        ? (array[placeindex]['isExpanded'] = !array[placeindex]['isExpanded'])
-        : (array[placeindex]['isExpanded'] = false),
+        ? (array[placeindex].isExpanded = !array[placeindex].isExpanded)
+        : (array[placeindex].isExpanded = false),
     );
     setDoorList(array);
   };

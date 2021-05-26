@@ -5,7 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import LoginView from './src/LoginView/LoginView';
 import DoorsView from './src/DoorsView/DoorsView';
-import { MainStackParams } from './src/Navigation/MainStackParamList';
+import { MainStackParams } from './src/Navigation/Params';
 
 const MainStack = createStackNavigator<MainStackParams>();
 

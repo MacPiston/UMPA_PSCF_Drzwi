@@ -32,7 +32,7 @@ import {
   connectionStates,
   ActionState,
 } from './ServersReducer';
-import { MainStackParams } from '../Navigation/MainStackParamList';
+import { MainStackParams } from '../Navigation/Params';
 
 type loginScreenProp = StackNavigationProp<MainStackParams, 'Login'>;
 
@@ -160,8 +160,8 @@ const LoginView: React.FC = () => {
     if (response) {
       setLoginState(loginStates.loginSuccess);
       setTimeout(() => {
-        navigation.navigate('Doors');
-      });
+        navigation.navigate('Doors', { socket, email });
+      }, 200);
     } else {
       setLoginState(loginStates.loginFailed);
       setTimeout(() => setLoginState(loginStates.enabled), 3000);
