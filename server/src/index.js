@@ -60,13 +60,13 @@ connection.connect(function (err) {
                 socket.emit('users', users);
             });
         });
-        
+
     });
 
     connection.query("SELECT * from doors", function(error, results, fields) {
         if(error) throw error;
         for(const row of results) {
-            doors.push(new Door(row.lockID, row.door_name));
+            doors.push(new Door(row.lockID, row.doorName));
         }
     });
 
@@ -74,7 +74,7 @@ connection.connect(function (err) {
 
 io.on('connection', (socket) => {
     console.log("connection");
-    
+
     socket.on('isLoggedIn', (data) => {
         socket.emit('isLoggedInResponse', {isLoggedIn: isLoggedIn});
     });
@@ -93,7 +93,7 @@ io.on('connection', (socket) => {
             }
             socket.emit('adminLoginResponse', {response: response});
         });
-        
+
     });
 
     socket.on('loginRequest', (data) => {
@@ -152,10 +152,25 @@ io.on('connection', (socket) => {
         });
     });
 
+    socket.on('doorList', (data) => {
+        var doorListQuery = 'SELECT * from doors';
+
+        connection.query(doorListQuery, function(err, result, fields) {
+            if(err) {
+                throw err;
+            } else {
+                var doorsList = [];
+                for(const row of result) {
+                    doorsList.push(new Door(row.lockID, row.door_name));
+                }socket.emit('doorListRes', doorsList);
+            }
+        });
+    });
+
     socket.on('addDoors', (data) => {
-        var addDoorQuery = 'insert ignore into doors (lockID, door_name) values ("' 
-            + data.lockID + '", "' + data.doorName + '");'; 
-        
+        var addDoorQuery = 'insert ignore into doors (lockID, door_name) values ("'
+            + data.lockID + '", "' + data.doorName + '");';
+
         connection.query(addDoorQuery, function(err, result, fields) {
             if(err) {
                 console.log("Adding doors: " + data.lockID + "failed");
@@ -185,7 +200,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('addPermission', (data) => {
-        var addPermissionQuery = 'insert ignore into permissions (lockID, email) values ("' 
+        var addPermissionQuery = 'insert ignore into permissions (lockID, email) values ("'
         + data.lockID + '", "' + data.email + '");';
         connection.query(addPermissionQuery, function(err, result, fields) {
             if(err) {
@@ -221,12 +236,57 @@ io.on('connection', (socket) => {
             if(err) {
                 console.log("Couldn't get list of doors for user: " + data.email);
             } else {
-                
+
                 for(const row of results) {
-                    doorsList.push(new Door(row.lockID, row.door_name));
+                    doorsList.push(new Door(row.lockID, row.doorName));
                 }
                 socket.emit('doors', {doorsList: doorsList});
                 console.log(doorsList);
+            }
+        });
+    });
+
+    socket.on('userDoorList', (data) => {
+        console.log("User door List emited");
+        var usersDoorsQuery = 'select * from users WHERE email IN (select email from permissions WHERE lockID="'+ data.lockID +'");';
+        var usersList = [];
+        connection.query(usersDoorsQuery, function(err, results, fields) {
+            if(err) {
+                console.log("Couldn't get list of users for doors: " + data.lockID);
+            } else {
+                for(const row of results) {
+                    usersList.push(new User(row.email, row.password));
+                }
+                socket.emit('userDoorListRes', usersList);
+                console.log(usersList);
+            }
+        });
+    });
+
+    socket.on("editLockId", (data) => {
+        console.log("editing lockID");
+        var editLockIDQuery = 'UPDATE doors SET lockID = "' + data.newLockID + '" WHERE lockID="' + data.oldLockID + '";';
+        connection.query(editLockIDQuery, function(err){
+            if(err) {
+                console.log("Couldnt update door: " + data.oldLockID + " with new lock ID: " + data.newLockID);
+                throw err;
+            } else {
+                console.log("Successfully updated door with lock ID: " + data.newLockID);
+            }
+        });
+    });
+
+    socket.on("editDoorName", (data) => {
+        console.log("editing door name");
+        console.log(data.newDoorName)
+        console.log(data.oldLockID)
+        var editDoorNameQuery = 'UPDATE doors SET door_name = "' + data.newDoorName + '" WHERE lockID="' + data.oldLockID + '";';
+        connection.query(editDoorNameQuery, function(err){
+            if(err) {
+                console.log("Couldnt update door: " + data.oldLockID + " with new door name: " + data.newDoorName);
+                throw err;
+            } else {
+                console.log("Successfully updated door with lock ID: " + data.oldLockID);
             }
         });
     });

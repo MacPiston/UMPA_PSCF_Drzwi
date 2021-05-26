@@ -1,0 +1,23 @@
+import React from "react"
+import styles from '../styles/User.module.css'
+
+const Popup = props => {
+    let lockID = React.createRef();
+    let doorName = React.createRef();
+
+    return(
+        <div className={styles.popupbox}>
+            <div className={styles.boxpop}>
+                <span className={styles.closeicon} onClick={props.handleClose}>x</span>
+                <form className={styles.form} onSubmit={() => props.handleEdit(lockID.current.value, doorName.current.value)}>
+                    <h2>Edit door: {props.lockID} </h2>
+                    <input className={styles.inputtext} placeholder="Lock ID" type="text"  ref={lockID}  />
+                    <input className={styles.inputtext} placeholder="Door name" type="text"  ref={doorName} />
+                    <input className={styles.inputsubmit} type="submit" value="Edit door" />
+                </form>
+            </div>
+        </div>
+    );
+}
+
+export default Popup;
