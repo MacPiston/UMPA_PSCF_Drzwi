@@ -15,35 +15,35 @@ var deletePermissionQueries = [];
 const DoorItem = props => {
     const [isChecked, setIsChecked] = useState(props.isChecked);
     function handleClick() {
-        if(isChecked) {
+        if (isChecked) {
             console.log("delete perm");
-            addPermissionQueries = addPermissionQueries.filter(function(perm){
+            addPermissionQueries = addPermissionQueries.filter(function (perm) {
                 return perm.lockID != props.lockID;
             });
             deletePermissionQueries.push(new Permission(props.lockID, props.user));
         } else {
             console.log("add perm");
-            deletePermissionQueries = deletePermissionQueries.filter(function(perm){
+            deletePermissionQueries = deletePermissionQueries.filter(function (perm) {
                 return perm.lockID != props.lockID;
             });
             addPermissionQueries.push(new Permission(props.lockID, props.user));
         }
         setIsChecked(!isChecked);
-        
+
     }
-    return(
+    return (
         <div className={styles.doorRow}>
             <div>{props.index}.</div>
             <div>{props.lockID}</div>
             <div>{props.doorName}</div>
-            <div><input id={props.lockID} type="checkbox" checked={isChecked} onClick={handleClick}/></div>
+            <div><input id={props.lockID} type="checkbox" checked={isChecked} onClick={handleClick} /></div>
         </div>
     );
 }
 
 function checkDoorsInPermissions(permissions, door) {
-    for(const perm of permissions) {
-        if(door.lockID == perm.lockID) {
+    for (const perm of permissions) {
+        if (door.lockID == perm.lockID) {
             return true;
         }
     }
@@ -58,8 +58,8 @@ const PermissionPopup = props => {
     const socket = props.socket;
 
     function save() {
-        socket.emit("addPermissions", {addQueries: addPermissionQueries});
-        socket.emit("deletePermissions", {deleteQueries: deletePermissionQueries});
+        socket.emit("addPermissions", { addQueries: addPermissionQueries });
+        socket.emit("deletePermissions", { deleteQueries: deletePermissionQueries });
         props.handleSave();
     }
 
@@ -71,7 +71,7 @@ const PermissionPopup = props => {
         props.handleCancel();
     }
 
-    return(
+    return (
         <div className={styles.popupbox}>
             <div className={styles.boxpop}>
                 <div className={styles.buttonGroup}>
@@ -86,9 +86,9 @@ const PermissionPopup = props => {
                     <div>Permission</div>
                 </div>
                 {doors.map(door => (
-                    <DoorItem index={index++} lockID={door.lockID} doorName={door.doorName} 
-                    isChecked={checkDoorsInPermissions(permissions, door)} 
-                    user={props.user}/>
+                    <DoorItem index={index++} lockID={door.lockID} doorName={door.doorName}
+                        isChecked={checkDoorsInPermissions(permissions, door)}
+                        user={props.user} />
                 ))}
             </div>
         </div>

@@ -22,10 +22,10 @@ class User {
     constructor(email, pass) {
         this.email = email;
         this.password = pass;
-        this.perm=false;
+        this.perm = false;
     }
-    setPermission(perm){
-        this.perm=perm;
+    setPermission(perm) {
+        this.perm = perm;
     }
 }
 
@@ -35,12 +35,6 @@ const socket = io.connect("http://localhost:4000", {
 });
 
 socket.emit('doorList', {});
-
-socket.on('doorListRes', function(data) {
-    for(const door of data) {
-        doors.push(new Door(door.lockID, door.doorName));
-    }
-});
 
 socket.on('deleteDoorsRes', function (data) {
     if (data.error) {
@@ -53,26 +47,26 @@ socket.on('deleteDoorsRes', function (data) {
 
 socket.on('addDoorsRes', function (data) {
     if (data.error) {
-        alert('Podano następujący ID: ' + data.lockID +' oraz hasło: '+ data.doorName + '\nDodanie zakończyło się sukcesem');
-        Main.adding(data.lockID,data.doorName);
+        alert('Podano następujący ID: ' + data.lockID + ' oraz hasło: ' + data.doorName + '\nDodanie zakończyło się sukcesem');
+        Main.adding(data.lockID, data.doorName);
     } else {
-        alert('Podano następujący ID: ' + data.lockID +' oraz hasło: '+ data.doorName + '\nDodanie zakonczyło się niepowodzeniem');
+        alert('Podano następujący ID: ' + data.lockID + ' oraz hasło: ' + data.doorName + '\nDodanie zakonczyło się niepowodzeniem');
     }
 });
 
 
 
-socket.on('users', function(data) {
-    usersAll=[];
-    for(const user of data) {
+socket.on('users', function (data) {
+    usersAll = [];
+    for (const user of data) {
         usersAll.push(new User(user.email, user.password));
     }
     Main.gotUser();
 });
 
-socket.on('userDoorListRes', function(data) {
-    userPerm=[];
-    for(const user of data) {
+socket.on('userDoorListRes', function (data) {
+    userPerm = [];
+    for (const user of data) {
         userPerm.push(new User(user.email, user.password));
     }
     Main.gotUserPerm();
@@ -129,11 +123,13 @@ export default function Main() {
 
     const [login, setLogin] = useState(true);
 
+
+
     const loginUser = () => {
         socket.emit("isLoggedIn", {});
         socket.on("isLoggedInResponse", (data) => {
-            console.log("login");
-            console.log(data.isLoggedIn);
+            //console.log("login");
+            //console.log(data.isLoggedIn);
             setLogin(data.isLoggedIn);
             return data.isLoggedIn;
         });
@@ -141,7 +137,7 @@ export default function Main() {
 
     loginUser();
 
-    if(!login) {
+    if (!login) {
         return <Login setLogin={setLogin} />
     }
 
@@ -162,25 +158,27 @@ export default function Main() {
         setIsOpen3(!isOpen3);
     }
 
-    function savePermissions(newPermission, oldPermission){
-        var deleteUsers=[];
-        var addUsers=[];
+    function savePermissions(newPermission, oldPermission) {
+        var deleteUsers = [];
+        var addUsers = [];
         lockIDStatePerm;
-        for(const userNew of newPermission) {
-            for(const userOld of oldPermission) {
-                if(userNew.perm!==userOld.perm){
-                    if(userNew.perm){
+        for (const userNew of newPermission) {
+            for (const userOld of oldPermission) {
+                if (userNew.perm !== userOld.perm) {
+                    if (userNew.perm) {
                         addUsers.push(userNew.email);
-                    }else{
+                    } else {
                         deleteUsers.push(userNew.email);
                     }
                 }
             }
-            for(const email of addUsers) {
-                socket.emit("addPermission",{email:email, lockID:lockIDStatePerm})
+            console.log(lockIDStatePerm);
+            for (const email of addUsers) {
+                console.log(email);
+                socket.emit("addPermission", { email: email, lockID: lockIDStatePerm })
             }
-            for(const email of deleteUsers) {
-                socket.emit("deletePermission",{email:email, lockID:lockIDStatePerm})
+            for (const email of deleteUsers) {
+                socket.emit("deletePermission", { email: email, lockID: lockIDStatePerm })
 
             }
         }
@@ -197,10 +195,10 @@ export default function Main() {
         setlockIDPerm(lockID);
     }
 
-    function checkIfNewDoorExists(doorName) {
+    function checkIfNewDoorExists(lockID) {
         for (let i = 0; i < doors.length; i++) {
             console.log(doors[i]);
-            if (doors[i].doorName === doorName) {
+            if (doors[i].lockID == lockID) {
                 return true;
             }
         }
@@ -216,44 +214,51 @@ export default function Main() {
     function deleteDoor(lockID) {
         for (let i = 0; i < doors.length; i++) {
             if (doors[i].lockID === lockID) {
-                socket.emit("deleteDoors", {lockID: lockID});
+                socket.emit("deleteDoors", { lockID: lockID });
                 doors.splice(i, 1);
                 refresh();
                 break;
             }
         }
-        socket.emit('doorList', {});
     }
 
-    function editDoor(lockID){
+    function editDoor(lockID) {
         currentEditDoor(lockID);
         togglePopup();
     }
 
-    function editPermissions(lockID){
+    function editPermissions(lockID) {
 
         socket.emit('requestUsers', {});
-        socket.emit('userDoorList', {lockID:lockID});
+        socket.emit('userDoorList', { lockID: lockID });
 
 
         editPermissionsDoor(lockID);
     }
 
     function executeEdit(lockID, doorName) {
-        for(var door of doors) {
-            if(door.lockID === lockIDState) {
-                if(doorName != "") {
+        for (var door of doors) {
+            if (door.lockID === lockIDState) {
+                if (doorName != "") {
                     door.doorName = doorName;
-                    socket.emit("editDoorName", {newDoorName: doorName, oldLockID: lockIDState});
-                } if(lockID != "") {
+                    socket.emit("editDoorName", { newDoorName: doorName, oldLockID: lockIDState });
+                } if (lockID != "") {
                     door.lockID = lockID;
-                    socket.emit("editLockId", {newLockID: lockID, oldLockID: lockIDState});
+                    socket.emit("editLockId", { newLockID: lockID, oldLockID: lockIDState });
                 }
             }
         }
         togglePopup();
         Main.refresh;
     }
+
+
+    socket.on('doorListRes', function (data) {
+        for (const door of data) {
+            doors.push(new Door(door.lockID, door.doorName));
+        }
+        refresh();
+    });
 
     Main.refresh = useForceUpdate;
     Main.adding = addDoor;
@@ -266,11 +271,19 @@ export default function Main() {
     function handleSubmitAdd(event) {
         event.preventDefault();
         event.stopPropagation();
-        if(checkIfNewDoorExists(doorIDAdd.current.value)) {
+        let lockID = doorIDAdd.current.value;
+        let doorName = doorNameAdd.current.value;
+
+        if (lockID == '' || doorName == '') {
+            alert("Wypełnij wszystkie pola!");
+            return;
+        }
+        if (checkIfNewDoorExists(lockID)) {
             alert("Drzwi o podanym ID już istnieją!");
             return;
         }
-        socket.emit("addDoors", {lockID: doorIDAdd.current.value, doorName: doorNameAdd.current.value});
+
+        socket.emit("addDoors", { lockID: doorIDAdd.current.value, doorName: doorNameAdd.current.value });
         doorIDAdd.current.value = '';
         doorNameAdd.current.value = '';
     }
@@ -286,27 +299,27 @@ export default function Main() {
                 <h1 className={styles.title}>
                     Doors
                 </h1>
-                <DoorTable items={doors}/>
+                <DoorTable items={doors} />
                 <div className={styles.box}>
                     <form className={styles.form} onSubmit={handleSubmitAdd}>
-                        <h2>Add user</h2>
+                        <h2>Add door</h2>
                         <input className={styles.inputtext} placeholder="DoorID" type="text" ref={doorIDAdd} />
-                        <input className={styles.inputtext} placeholder="DoorName" type="password" ref={doorNameAdd} />
-                        <input className={styles.inputsubmit} type="submit" value="Add new user" />
+                        <input className={styles.inputtext} placeholder="DoorName" type="text" ref={doorNameAdd} />
+                        <input className={styles.inputsubmit} type="submit" value="Add new door" />
                     </form>
                 </div>
             </main>
             {isOpen && <Popup
                 lockID={lockIDState}
                 handleClose={togglePopup}
-                handleEdit={executeEdit}/> }
+                handleEdit={executeEdit} />}
             {isOpen2 && isOpen3 && <PopupPermission
                 lockID={lockIDStatePerm}
                 usersAll={usersAll}
                 usersPerm={userPerm}
                 handleSave={savePermissions}
                 handleClose={togglePopup2}
-            /> }
+            />}
 
 
         </div>
