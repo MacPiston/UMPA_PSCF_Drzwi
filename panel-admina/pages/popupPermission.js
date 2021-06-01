@@ -4,26 +4,25 @@ import Main from "./users";
 import { useState } from 'react';
 
 class User {
-    constructor(email, pass) {
+    constructor(email, pass, perm) {
         this.email = email;
         this.password = pass;
-        this.perm = false;
+        this.perm = perm;
     }
     setPermission(perm) {
         this.perm = perm;
     }
 }
 
-var users = [];
-var doorUsers = [];
-var doorUsersNew = [];
+var oldUsersPermission = [];
+var newUsersPermission = [];
 
 function DoorItem(props) {
 
     const [isChecked, setIsChecked] = useState(props.items.perm);
 
     function handleClick(email) {
-        for (const userperm of doorUsersNew) {
+        for (const userperm of newUsersPermission) {
             if (userperm.email === email) {
                 userperm.perm = !userperm.perm;
             }
@@ -46,27 +45,43 @@ function DoorItem(props) {
 
 const Popup = props => {
     var index = 1;
-    users = props.usersAll;
-    doorUsers = props.usersPerm;
+    const users = props.usersAll;
+    const doorUsers = props.usersPerm;
+    oldUsersPermission = [];
+    newUsersPermission = [];
 
     function save() {
-        props.handleSave(doorUsersNew, users);
+        props.handleSave(newUsersPermission, oldUsersPermission);
     }
 
     function cancel() {
         props.handleClose();
     }
 
+    for (const user of users) {
+        oldUsersPermission.push(new User (user.email,user.password,false));
+        newUsersPermission.push(new User (user.email,user.password,false));
+    }
+
     if (doorUsers.length > 0) {
         for (const userperm of doorUsers) {
-            for (const user of users) {
+            for (const user of newUsersPermission) {
                 if (userperm.email === user.email) {
-                    user.setPermission(true);
+                    user.setPermission(true)
+
+                }
+            }
+        }
+        for (const userperm of doorUsers) {
+            for (const user of oldUsersPermission) {
+                if (userperm.email === user.email) {
+                    user.setPermission(true)
+
                 }
             }
         }
     }
-    doorUsersNew = users;
+
 
     return (
         <div className={styles.popupbox}>
@@ -81,7 +96,7 @@ const Popup = props => {
                     <div>Email</div>
                     <div>Permission</div>
                 </div>
-                {doorUsersNew.map(item => (
+                {newUsersPermission.map(item => (
                     <DoorItem index={index++} items={item} />
                 ))}
             </div>

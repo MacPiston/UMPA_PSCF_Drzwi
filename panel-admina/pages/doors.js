@@ -161,7 +161,7 @@ export default function Main() {
     function savePermissions(newPermission, oldPermission) {
         var deleteUsers = [];
         var addUsers = [];
-        lockIDStatePerm;
+
         for (const userNew of newPermission) {
             for (const userOld of oldPermission) {
                 if (userNew.perm !== userOld.perm) {
