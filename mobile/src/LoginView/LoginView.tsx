@@ -1,11 +1,6 @@
 /* eslint-disable global-require */
 import React, { useEffect, useReducer, useRef, useState } from 'react';
-import {
-  RefreshControl,
-  KeyboardAvoidingView,
-  TextInput,
-  ScrollView,
-} from 'react-native';
+import { RefreshControl, KeyboardAvoidingView, TextInput } from 'react-native';
 import { io, Socket } from 'socket.io-client';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/core';
@@ -58,7 +53,7 @@ const LoginView: React.FC = () => {
   const [isRefreshing, setRefreshing] = useState<boolean>(false);
   const [loginState, setLoginState] = useState<number>(loginStates.disabled);
 
-  const [socket, setSocket] = useState<Socket>();
+  const [socket, setSocket] = useState<Socket>(io());
 
   const navigation = useNavigation<loginScreenProp>();
 
@@ -74,7 +69,7 @@ const LoginView: React.FC = () => {
     fetchServersAsync();
 
     return () => {
-      if (socket) socket.disconnect();
+      // if (socket) socket.disconnect();
       srvDispatch({ type: DisconnectAll });
     };
   }, []);
@@ -87,7 +82,7 @@ const LoginView: React.FC = () => {
   }, [servers]);
 
   const handleRefresh = async () => {
-    if (socket) socket.disconnect();
+    // if (socket) socket.disconnect();
 
     setRefreshing(true);
     setSelectedServer(null);
@@ -119,7 +114,7 @@ const LoginView: React.FC = () => {
     const { ip } = passedServer;
 
     setLoginState(loginStates.disabled);
-    if (socket) socket.disconnect();
+    // if (socket) socket.disconnect();
 
     emailInputRef.current.clear();
     pwdInputRef.current.clear();
@@ -129,7 +124,6 @@ const LoginView: React.FC = () => {
       const tempsocket = io(address, { transports: ['websocket'] });
 
       tempsocket.on('connect', () => {
-        setSocket(tempsocket);
         setLoginState(loginStates.enabled);
         srvDispatch({ type: SetConnected, server: passedServer });
       });
@@ -141,6 +135,7 @@ const LoginView: React.FC = () => {
         // eslint-disable-next-line no-use-before-define
         handleLoginResponse(data),
       );
+      setSocket(tempsocket);
     }
   };
 
@@ -159,9 +154,7 @@ const LoginView: React.FC = () => {
     console.log(response);
     if (response) {
       setLoginState(loginStates.loginSuccess);
-      setTimeout(() => {
-        navigation.navigate('Doors', { socket, email });
-      }, 200);
+      if (socket !== undefined) navigation.navigate('Doors', { socket, email });
     } else {
       setLoginState(loginStates.loginFailed);
       setTimeout(() => setLoginState(loginStates.enabled), 3000);

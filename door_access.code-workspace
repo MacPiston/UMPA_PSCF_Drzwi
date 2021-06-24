@@ -11,11 +11,22 @@
     {
       "name": "mobile",
       "path": "mobile"
-    }
+    },
+    {
+      "name": "esp32",
+      "path": "esp32"
+    },
+
   ],
   "settings": {
     "git.ignoreLimitWarning": true,
     "editor.formatOnSave": true,
-    "eslint.format.enable": true
-  }
+    "eslint.format.enable": true,
+    "[cpp]": {
+      "editor.defaultFormatter": "ms-vscode.cpptools",
+      "editor.wordBasedSuggestions": false,
+      "editor.suggest.insertMode": "replace",
+      "editor.semanticHighlighting.enabled": true
+    },
+  },
 }

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp, useRoute } from '@react-navigation/core';
+import { useNavigation, useRoute } from '@react-navigation/core';
 import { styles } from './Stylesheets/Stylesheets';
 import ExpandableItem from './ExpandableItem';
 import { DoorsScreenRouteProp, MainStackParams } from '../Navigation/Params';
@@ -24,9 +24,10 @@ interface Door {
 type doorsScreenProp = StackNavigationProp<MainStackParams, 'Doors'>;
 
 const DoorsView: React.FC = () => {
-  const [doorList, setDoorList] = useState<Door[]>();
-  // const navigation = useNavigation<doorsScreenProp>();
-  const { socket, email } = useRoute<DoorsScreenRouteProp>();
+  const [doorList, setDoorList] = useState<Door[]>([]);
+  const navigation = useNavigation<doorsScreenProp>();
+  const { params } = useRoute<DoorsScreenRouteProp>();
+  const { socket, email } = params;
 
   const refreshDoorList = () => {
     socket.emit('doorsList', { email });
@@ -38,22 +39,24 @@ const DoorsView: React.FC = () => {
   const logOut = () => {
     socket.disconnect();
     // TODO powrót do widoku logowania
+    navigation.navigate('Login');
   };
 
-  socket.on('doors', (data) => {
-    const array = data.doorsList.map(
-      (item) =>
-        ({
-          doorName: item.doorName,
-          lockID: item.lockID,
-          inBtRange: false,
-          isExpanded: false,
-        } as Door),
-    );
+  interface DataType {
+    doorsList: Door[];
+  }
+
+  socket.on('doors', (data: DataType) => {
+    const array = data.doorsList.map((item) => ({
+      doorName: item.doorName,
+      lockID: item.lockID,
+      inBtRange: false,
+      isExpanded: false,
+    }));
     setDoorList(array);
   });
 
-  const updateLayout = (index) => {
+  const updateLayout = (index: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     const array = [...doorList];
     array.map((value, placeindex) =>
