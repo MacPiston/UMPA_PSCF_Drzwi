@@ -7,6 +7,11 @@ var connection = mysql.createConnection({
 
 connection.connect();
 
+connection.query("DROP DATABASE IF EXISTS `door_access`;", function(err) {
+    if(err) throw err;
+    console.log("Cleared previous schema.");
+});
+
 connection.query("CREATE SCHEMA IF NOT EXISTS `door_access` DEFAULT CHARACTER SET utf8 COLLATE utf8_polish_ci;", function (err) {
     if (err) throw err;
     console.log("Scheme door_access successfully created.");
@@ -36,18 +41,18 @@ connection.query('insert ignore into users (email, password) values ("test@gmail
 
 //-----------------------------------------------------------------------------------------------------
 
-connection.query("CREATE TABLE IF NOT EXISTS  `door_access`.`doors` (`lockID` VARCHAR(45) NOT NULL, `door_name` VARCHAR(30) NOT NULL, PRIMARY KEY (`lockID`)) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8 COLLATE = utf8_polish_ci;", function (err) {
+connection.query("CREATE TABLE IF NOT EXISTS  `door_access`.`doors` (`lockID` VARCHAR(45) NOT NULL, `door_name` VARCHAR(30) NOT NULL, `uuid` VARCHAR(30) UNIQUE NOT NULL, `isOpen` BOOLEAN NOT NULL DEFAULT FALSE,PRIMARY KEY (`lockID`)) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8 COLLATE = utf8_polish_ci;", function (err) {
     if (err) throw err;
     console.log("Doors data table has been created.");
 });
 
 
-connection.query('insert ignore into doors (lockID, door_name) values ("192.1.200.15", "serwerownia");', function (err) {
+connection.query('insert ignore into doors (lockID, door_name, uuid) values ("192.1.200.15", "serwerownia", "11111111111");', function (err) {
     if (err) throw err;
     console.log("door data #1 added");
 });
 
-connection.query('insert ignore into doors (lockID, door_name) values ("200.200.150.1", "pracownia");', function (err) {
+connection.query('insert ignore into doors (lockID, door_name, uuid) values ("200.200.150.1", "pracownia", "22222222222");', function (err) {
     if (err) throw err;
     console.log("door data #2 added.");
 });
