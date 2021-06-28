@@ -206,6 +206,11 @@
                 socket.emit("quickOpenDoor", {doorId: doorID});
             }
         });
+
+        socket.on("openLock", (data) => {
+            console.log("heloł");
+            socket.emit("openLockResponse", {didOpen: true, uuid: "11111111111"});
+        });
     </script>
 </body>
 

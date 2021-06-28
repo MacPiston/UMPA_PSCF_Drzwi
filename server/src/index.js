@@ -11,6 +11,15 @@ var users = [];
 var doors = [];
 var permissions = [];
 
+const lockFunction = {
+    OPEN: "open",
+    CLOSE: "close",
+    QUICK_OPEN: "quick_open",
+    NOTHING: "nothing",
+}
+var currentFunction = lockFunction.NOTHING;
+var currentUUID = "";
+
 class User {
     constructor(email, pass) {
         this.email = email;
@@ -354,6 +363,48 @@ io.on('connection', (socket) => {
                 if (err) throw err;
                 console.log("permission data removed");
             });
+        }
+    });
+
+    socket.on("openDoor", (data) => {
+        console.log("opening doors with id: " + data.doorId);
+        socket.emit("openLock", {doorId: data.doorId});
+    });
+
+    socket.on("closeDoor", (data) => {
+        console.log("closing doors with id: " + data.doorId);
+        socket.emit("closeLock", {doorId: data.doorId});
+    });
+
+    socket.on("quickOpenDoor", (data) => {
+        console.log("opening doors for 10 seconds with id: " + data.doorId);
+        socket.emit("quickOpenLock", {doorId: data.doorId});
+        
+    });
+
+    socket.on("openLockResponse", (data) => {
+        console.log("response");
+        if(data.didOpen) {
+            console.log("didOpen true");
+            var openDoorQuery = 'UPDATE doors SET isOpen = 1 WHERE uuid="' + data.uuid + '";';
+            connection.query(openDoorQuery, function(err){
+                if(err) throw err;
+            });
+        }
+    });
+
+    socket.on("closeLockResponse", (data) =>{
+        if(data.didClose) {
+            var closeDoorQuery = 'UPDATE doors SET isOpen = 0 WHERE uuid="' + data.uuid + '";';
+            connection.query(closeDoorQuery, function(err){
+                if(err) throw err;
+            });
+        }
+    });
+    
+    socket.on("quickOpenLockResponse", (data) => {
+        if(data.didOpen) {
+            console.log("opened for 10 seconds");
         }
     });
 });
