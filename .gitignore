@@ -11,3 +11,4 @@
 # node.js
 #
 node_modules/
+/esp32/.vscode
