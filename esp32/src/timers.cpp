@@ -8,7 +8,7 @@ volatile bool blinkTriggered = false;
 void IRAM_ATTR onBlink()
 {
     portENTER_CRITICAL_ISR(&blinkerMux);
-    digitalWrite(STATUS_LED, LOW);
+    blinkTriggered = true;
     portEXIT_CRITICAL_ISR(&blinkerMux);
 }
 
@@ -16,5 +16,5 @@ void setupTimers()
 {
     blinkTimer = timerBegin(0, 80000, true);
     timerAttachInterrupt(blinkTimer, &onBlink, true);
-    timerAlarmWrite(blinkTimer, 250, false);
+    timerAlarmWrite(blinkTimer, 100, false);
 }
