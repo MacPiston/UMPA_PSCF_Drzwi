@@ -8,6 +8,7 @@ void setupIO()
     Serial.println("Lock startup");
 
     pinMode(STATUS_LED, OUTPUT);
+    pinMode(LOCK_PIN, OUTPUT);
     pinMode(BUTTON, INPUT_PULLUP);
 }
 

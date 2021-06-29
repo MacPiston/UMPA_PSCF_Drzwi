@@ -6,7 +6,7 @@
 #define WIFI_PWD "maciek2505"
 #define SERVER_IP "192.168.50.70"
 
-#define LOCK_PIN 12
+#define LOCK_PIN 23
 #define STATUS_LED 19
 #define BUTTON 25
 #endif

@@ -16,7 +16,7 @@ void setup()
   setupBluetooth();
   digitalWrite(STATUS_LED, LOW);
 
-  openLockTime();
+  // openLockTime();
 }
 
 void checkTriggers()
@@ -37,6 +37,6 @@ void checkTriggers()
 
 void loop()
 {
-  checkTriggers();
-  // socketIO.loop();
+  // checkTriggers();
+  socketIO.loop();
 }
