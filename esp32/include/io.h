@@ -2,5 +2,6 @@
 #define IO_H_
 
 void setupIO();
+void blinkLed();
 
 #endif

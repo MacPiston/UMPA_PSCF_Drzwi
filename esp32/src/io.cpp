@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "settings.h"
+#include "timers.h"
 
 void setupIO()
 {
@@ -8,4 +9,10 @@ void setupIO()
 
     pinMode(STATUS_LED, OUTPUT);
     pinMode(BUTTON, INPUT_PULLUP);
+}
+
+void blinkLed()
+{
+    digitalWrite(STATUS_LED, HIGH);
+    timerAlarmEnable(blinkTimer);
 }

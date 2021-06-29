@@ -4,6 +4,7 @@
 #include <SocketIOclient.h>
 
 extern SocketIOclient socketIO;
+void socketIOEvent(socketIOmessageType_t type, uint8_t *payload, size_t length);
 void setupSocketIO();
 
 #endif
