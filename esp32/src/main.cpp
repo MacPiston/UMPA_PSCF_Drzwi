@@ -1,13 +1,18 @@
 #include <Arduino.h>
-#include "setup/setup.h"
+#include "io.h"
+#include "network.h"
+#include "socketio.h"
+#include "bluetooth.h"
 
-void setup() {
+void setup()
+{
   setupIO();
-  setupWifi();
+  setupNetwork();
   setupSocketIO();
-  setupBtBeacon();
+  setupBluetooth();
 }
 
-void loop() {
+void loop()
+{
   socketIO.loop();
 }
