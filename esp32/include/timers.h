@@ -2,9 +2,14 @@
 #define TIMERS_H_
 #include <Arduino.h>
 
+extern portMUX_TYPE timerMux;
+
 extern hw_timer_t *blinkTimer;
-extern portMUX_TYPE blinkerMux;
 extern volatile bool blinkTriggered;
+
+extern hw_timer_t *lockTimer;
+extern volatile bool lockTriggered;
+
 void setupTimers();
 
 #endif

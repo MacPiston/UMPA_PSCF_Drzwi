@@ -11,8 +11,34 @@ void setupIO()
     pinMode(BUTTON, INPUT_PULLUP);
 }
 
-void blinkLed()
+void ledOn()
 {
     digitalWrite(STATUS_LED, HIGH);
+}
+
+void ledOff()
+{
+    digitalWrite(STATUS_LED, LOW);
+}
+
+void ledBlink()
+{
+    ledOn();
     timerAlarmEnable(blinkTimer);
+}
+
+void openLock()
+{
+    digitalWrite(LOCK_PIN, HIGH);
+}
+
+void closeLock()
+{
+    digitalWrite(LOCK_PIN, LOW);
+}
+
+void openLockTime()
+{
+    openLock();
+    timerAlarmEnable(lockTimer);
 }
