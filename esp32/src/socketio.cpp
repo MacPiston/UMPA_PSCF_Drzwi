@@ -41,20 +41,45 @@ void socketIOEvent(socketIOmessageType_t type, uint8_t *payload, size_t length)
 
         if (strcmp(uuid, LOCK_UUID) == 0)
         {
-            if (strcmp(eventName, "openDoor") == 0)
+            DynamicJsonDocument responseData(256);
+            char responseString[128];
+            if (strcmp(eventName, "openLock") == 0)
             {
                 Serial.println("Lock opening");
                 openLock();
+                responseData[0] = "openLockResponse";
+                responseData[1]["didOpen"] = true;
+                responseData[1]["uuid"] = LOCK_UUID;
+                serializeJson(responseData, responseString);
+
+                if (socketIO.sendEVENT(responseString))
+                    Serial.printf("[SIO] Response sent: %s \n", responseString);
             }
-            else if (strcmp(eventName, "quickOpenDoor") == 0)
+            else if (strcmp(eventName, "quickOpenLock") == 0)
             {
                 Serial.println("Lock quick-opening");
+
                 //TODO
+
+                responseData[0] = "quickOpenLockResponse";
+                responseData[1]["didOpen"] = true;
+                responseData[1]["uuid"] = LOCK_UUID;
+                serializeJson(responseData, responseString);
+
+                if (socketIO.sendEVENT(responseString))
+                    Serial.printf("[SIO] Response sent: %s \n", responseString);
             }
-            else if (strcmp(eventName, "closeDoor") == 0)
+            else if (strcmp(eventName, "closeLock") == 0)
             {
                 Serial.println("Lock closing");
                 closeLock();
+                responseData[0] = "closeLockResponse";
+                responseData[1]["didClose"] = true;
+                responseData[1]["uuid"] = LOCK_UUID;
+                serializeJson(responseData, responseString);
+
+                if (socketIO.sendEVENT(responseString))
+                    Serial.printf("[SIO] Response sent: %s \n", responseString);
             }
         }
     }
