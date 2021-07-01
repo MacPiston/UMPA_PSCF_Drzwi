@@ -2,7 +2,7 @@
 #define IO_H_
 
 void setupIO();
-void ledBlink();
+void ledOn();
 void ledOff();
 void openLockTime();
 void openLock();

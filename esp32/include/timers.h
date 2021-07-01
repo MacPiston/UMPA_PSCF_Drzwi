@@ -4,9 +4,6 @@
 
 extern portMUX_TYPE timerMux;
 
-extern hw_timer_t *blinkTimer;
-extern volatile bool blinkTriggered;
-
 extern hw_timer_t *lockTimer;
 extern volatile bool lockTriggered;
 

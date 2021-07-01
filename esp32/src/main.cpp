@@ -15,28 +15,19 @@ void setup()
   setupSocketIO();
   setupBluetooth();
   digitalWrite(STATUS_LED, LOW);
-
-  // openLockTime();
 }
 
 void checkTriggers()
 {
-  if (blinkTriggered)
-  {
-    blinkTriggered = false;
-    ledOff();
-  }
   if (lockTriggered)
   {
-    Serial.println("lock triggered");
     lockTriggered = false;
     closeLock();
-    delay(2000);
   }
 }
 
 void loop()
 {
-  // checkTriggers();
+  checkTriggers();
   socketIO.loop();
 }

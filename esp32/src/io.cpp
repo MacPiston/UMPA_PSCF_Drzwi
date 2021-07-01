@@ -22,12 +22,6 @@ void ledOff()
     digitalWrite(STATUS_LED, LOW);
 }
 
-void ledBlink()
-{
-    ledOn();
-    timerAlarmEnable(blinkTimer);
-}
-
 void openLock()
 {
     digitalWrite(LOCK_PIN, HIGH);
@@ -41,5 +35,7 @@ void closeLock()
 void openLockTime()
 {
     openLock();
+    timerAlarmWrite(lockTimer, 10000000, false);
+    timerWrite(lockTimer, 0);
     timerAlarmEnable(lockTimer);
 }

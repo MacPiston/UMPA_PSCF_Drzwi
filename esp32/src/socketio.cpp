@@ -20,6 +20,8 @@ void socketIOEvent(socketIOmessageType_t type, uint8_t *payload, size_t length)
         break;
     case sIOtype_EVENT:
     {
+        digitalWrite(STATUS_LED, HIGH);
+
         char *sptr = NULL;
         int id = strtol((char *)payload, &sptr, 10);
         Serial.printf("[SIO] Got event: %s id: %d\n", payload, id);
@@ -59,7 +61,7 @@ void socketIOEvent(socketIOmessageType_t type, uint8_t *payload, size_t length)
             {
                 Serial.println("Lock quick-opening");
 
-                //TODO
+                openLockTime();
 
                 responseData[0] = "quickOpenLockResponse";
                 responseData[1]["didOpen"] = true;
@@ -82,6 +84,7 @@ void socketIOEvent(socketIOmessageType_t type, uint8_t *payload, size_t length)
                     Serial.printf("[SIO] Response sent: %s \n", responseString);
             }
         }
+        digitalWrite(STATUS_LED, LOW);
     }
     break;
         // case sIOtype_ACK:
