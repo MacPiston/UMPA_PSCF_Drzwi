@@ -21,6 +21,14 @@ class Door {
     }
 }
 
+class DoorServer {
+    constructor(lockID, doorName, uuid) {
+        this.lockID = lockID;
+        this.doorName = doorName;
+        this.uuid = uuid;
+    }
+}
+
 var users = [];
 var doors = [];
 var permissions = [];
@@ -54,7 +62,7 @@ socket.on('fullDoorsListResponse', function(data) {
     doors = [];
     console.log("responsepopup");
     for(const door of data.doorsList) {
-        doors.push(new Door(door.lockID, door.doorName));
+        doors.push(new DoorServer(door.lockID, door.doorName, door.uuid));
     }
     socket.emit('doorsList', {email: Main.userName});
     

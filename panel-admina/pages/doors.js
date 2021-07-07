@@ -8,9 +8,11 @@ import Login from './login';
 const io = require("socket.io-client");
 
 class Door {
-    constructor(lockID, doorName) {
+    constructor(lockID, doorName, uuid, status) {
         this.lockID = lockID;
         this.doorName = doorName;
+        this.uuid = uuid;
+        this.status = status;
     }
 }
 
@@ -48,7 +50,7 @@ socket.on('deleteDoorsRes', function (data) {
 socket.on('addDoorsRes', function (data) {
     if (data.error) {
         alert('Podano następujący ID: ' + data.lockID + ' oraz hasło: ' + data.doorName + '\nDodanie zakończyło się sukcesem');
-        Main.adding(data.lockID, data.doorName);
+        Main.adding(data.lockID, data.doorName, data.uuid, data.status);
     } else {
         alert('Podano następujący ID: ' + data.lockID + ' oraz hasło: ' + data.doorName + '\nDodanie zakonczyło się niepowodzeniem');
     }
@@ -85,6 +87,8 @@ function DoorTable(props) {
                 <div>Lp.</div>
                 <div>lockID</div>
                 <div>doorName</div>
+                <div>UUID</div>
+                <div>status</div>
                 <div></div>
                 <div></div>
                 <div></div>
@@ -94,6 +98,8 @@ function DoorTable(props) {
                     <div>{index++}</div>
                     <div>{item.lockID}</div>
                     <div>{item.doorName}</div>
+                    <div>{item.uuid}</div>
+                    <div>{item.status}</div>
                     <div>
                         <button className={styles.editButtonTable} onClick={() => Main.editing(item.lockID)}>EDIT</button>
                     </div>
@@ -205,8 +211,13 @@ export default function Main() {
         return false;
     }
 
-    function addDoor(lockID, doorName) {
-        var newDoor = new Door(lockID, doorName);
+    function addDoor(lockID, doorName, uuid , status) {
+        if(status===1) {
+            var newDoor = new Door(lockID, doorName, uuid, "open");
+        } else {
+            var newDoor = new Door(lockID, doorName, uuid, "close");
+
+        }
         doors.push(newDoor);
         refresh();
     }
@@ -255,7 +266,12 @@ export default function Main() {
 
     socket.on('doorListRes', function (data) {
         for (const door of data) {
-            doors.push(new Door(door.lockID, door.doorName));
+            console.log(door.uuid)
+            if(door.isOpen===1){
+                doors.push(new Door(door.lockID, door.doorName, door.uuid, "open"));
+            } else {
+                doors.push(new Door(door.lockID, door.doorName, door.uuid, "close"));
+            }
         }
         refresh();
     });

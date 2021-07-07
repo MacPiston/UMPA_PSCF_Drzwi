@@ -34,6 +34,15 @@ class Door {
     }
 }
 
+class DoorServer {
+    constructor(lockID, doorName, uuid, isOpen) {
+        this.lockID = lockID;
+        this.doorName = doorName;
+        this.uuid = uuid;
+        this.isOpen = isOpen;
+    }
+}
+
 var server = app.listen(4000, function() {
     console.log('Server is open on port 4000');
 });
@@ -170,7 +179,8 @@ io.on('connection', (socket) => {
             } else {
                 var doorsList = [];
                 for(const row of result) {
-                    doorsList.push(new Door(row.lockID, row.door_name));
+                    console.log(row.isOpen);
+                    doorsList.push(new DoorServer(row.lockID, row.door_name, row.uuid, row.isOpen));
                 }socket.emit('doorListRes', doorsList);
             }
         });
@@ -183,11 +193,11 @@ io.on('connection', (socket) => {
         connection.query(addDoorQuery, function(err, result, fields) {
             if(err) {
                 console.log("Adding doors: " + data.lockID + "failed");
-                socket.emit('addDoorsRes', {lockID: data.lockID, doorName: data.doorName, error: false});
+                socket.emit('addDoorsRes', {lockID: data.lockID, doorName: data.doorName, uuid: data.uuid, status: data.isOpen, error: false});
                 throw err;
             } else {
                 console.log("Adding doors: " + data.lockID + "succeed");
-                socket.emit('addDoorsRes', {lockID: data.lockID, doorName: data.doorName, error: true});
+                socket.emit('addDoorsRes', {lockID: data.lockID, doorName: data.doorName, uuid: data.uuid, status: data.isOpen, error: true});
             }
         });
     });
@@ -335,7 +345,7 @@ io.on('connection', (socket) => {
             } else {
                 var newDoorsList = [];
                 for(const row of results) {
-                    newDoorsList.push(new Door(row.lockID, row.door_name));
+                    newDoorsList.push(new DoorServer(row.lockID, row.door_name, row.uuid, row.isOpen));
                 }
                 socket.emit("fullDoorsListResponse", {doorsList: newDoorsList});
                 console.log("popup");

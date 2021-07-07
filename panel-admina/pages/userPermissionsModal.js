@@ -36,6 +36,7 @@ const DoorItem = props => {
             <div>{props.index}.</div>
             <div>{props.lockID}</div>
             <div>{props.doorName}</div>
+            <div>{props.uuid}</div>
             <div><input id={props.lockID} type="checkbox" checked={isChecked} onClick={handleClick} /></div>
         </div>
     );
@@ -83,10 +84,11 @@ const PermissionPopup = props => {
                     <div>Lp.</div>
                     <div>Lock IP</div>
                     <div>Door Name</div>
+                    <div>UUID</div>
                     <div>Permission</div>
                 </div>
                 {doors.map(door => (
-                    <DoorItem index={index++} lockID={door.lockID} doorName={door.doorName}
+                    <DoorItem index={index++} lockID={door.lockID} doorName={door.doorName} uuid={door.uuid}
                         isChecked={checkDoorsInPermissions(permissions, door)}
                         user={props.user} />
                 ))}
