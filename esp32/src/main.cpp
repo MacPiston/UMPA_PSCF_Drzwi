@@ -1,13 +1,33 @@
 #include <Arduino.h>
-#include "setup/setup.h"
+#include "settings.h"
+#include "io.h"
+#include "timers.h"
+#include "network.h"
+#include "socketio.h"
+#include "bluetooth.h"
 
-void setup() {
+void setup()
+{
   setupIO();
-  setupWifi();
+  digitalWrite(STATUS_LED, HIGH);
+  setupTimers();
+  setupNetwork();
   setupSocketIO();
-  setupBtBeacon();
+  setupBluetooth();
+  digitalWrite(STATUS_LED, LOW);
 }
 
-void loop() {
+void checkTriggers()
+{
+  if (lockTriggered)
+  {
+    lockTriggered = false;
+    closeLock();
+  }
+}
+
+void loop()
+{
+  checkTriggers();
   socketIO.loop();
 }
