@@ -57,6 +57,24 @@
         <input id="email_list" type="text" placeholder="Email" />
         <button id="get-doors">Get doors</button>
     </div>
+
+    <div id="deltePermission">
+        <h2>Open door</h2>
+        <input id="doorOpen" type="text" placeholder="Door ID" />
+        <button id="doorOpenButton">Open</button>
+    </div>
+
+    <div id="deltePermission">
+        <h2>Close door</h2>
+        <input id="doorClose" type="text" placeholder="Door ID" />
+        <button id="doorCloseButton">Close</button>
+    </div>
+
+    <div id="deltePermission">
+        <h2>Open door for 10 seconds</h2>
+        <input id="doorQuickOpen" type="text" placeholder="Door ID" />
+        <button id="doorQuickOpenButton">Open for 10 seconds</button>
+    </div>
     
 
     <script>
@@ -78,6 +96,10 @@
         var deletePermissionButton = document.getElementById('delete-perm');
 
         var getUsersButton = document.getElementById('get-doors');
+
+        var doorOpenButton = document.getElementById('doorOpenButton');
+        var doorCloseButton = document.getElementById('doorCloseButton');
+        var doorQuickOpenButton = document.getElementById('doorQuickOpenButton');
 
         getUsersButton.addEventListener('click', function(e){
             var emailInput = document.getElementById('email_list');
@@ -156,6 +178,38 @@
                     alert(data);
                 });
             }
+        });
+
+        doorOpenButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            var doorID = document.getElementById('doorOpen').value;
+            if(doorID) {
+                console.log("Opening door with id: " + doorID);
+                socket.emit("openDoor", {doorId: doorID});
+            }
+        });
+
+        doorCloseButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            var doorID = document.getElementById('doorClose').value;
+            if(doorID) {
+                console.log("Closing door with id: " + doorID);
+                socket.emit("closeDoor", {doorId: doorID});
+            }
+        });
+
+        doorQuickOpenButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            var doorID = document.getElementById('doorQuickOpen').value;
+            if(doorID) {
+                console.log("Opening door with id for 10 seconds: " + doorID);
+                socket.emit("quickOpenDoor", {doorId: doorID});
+            }
+        });
+
+        socket.on("openLock", (data) => {
+            console.log("heloł");
+            socket.emit("openLockResponse", {didOpen: true, uuid: "11111111111"});
         });
     </script>
 </body>

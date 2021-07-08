@@ -11,6 +11,15 @@ var users = [];
 var doors = [];
 var permissions = [];
 
+const lockFunction = {
+    OPEN: "open",
+    CLOSE: "close",
+    QUICK_OPEN: "quick_open",
+    NOTHING: "nothing",
+}
+var currentFunction = lockFunction.NOTHING;
+var currentUUID = "";
+
 class User {
     constructor(email, pass) {
         this.email = email;
@@ -22,6 +31,15 @@ class Door {
     constructor(lockID, doorName) {
         this.lockID = lockID;
         this.doorName = doorName;
+    }
+}
+
+class DoorServer {
+    constructor(lockID, doorName, uuid, isOpen) {
+        this.lockID = lockID;
+        this.doorName = doorName;
+        this.uuid = uuid;
+        this.isOpen = isOpen;
     }
 }
 
@@ -161,7 +179,8 @@ io.on('connection', (socket) => {
             } else {
                 var doorsList = [];
                 for(const row of result) {
-                    doorsList.push(new Door(row.lockID, row.door_name));
+                    console.log(row.isOpen);
+                    doorsList.push(new DoorServer(row.lockID, row.door_name, row.uuid, row.isOpen));
                 }socket.emit('doorListRes', doorsList);
             }
         });
@@ -174,11 +193,11 @@ io.on('connection', (socket) => {
         connection.query(addDoorQuery, function(err, result, fields) {
             if(err) {
                 console.log("Adding doors: " + data.lockID + "failed");
-                socket.emit('addDoorsRes', {lockID: data.lockID, doorName: data.doorName, error: false});
+                socket.emit('addDoorsRes', {lockID: data.lockID, doorName: data.doorName, uuid: data.uuid, status: data.isOpen, error: false});
                 throw err;
             } else {
                 console.log("Adding doors: " + data.lockID + "succeed");
-                socket.emit('addDoorsRes', {lockID: data.lockID, doorName: data.doorName, error: true});
+                socket.emit('addDoorsRes', {lockID: data.lockID, doorName: data.doorName, uuid: data.uuid, status: data.isOpen, error: true});
             }
         });
     });
@@ -326,7 +345,7 @@ io.on('connection', (socket) => {
             } else {
                 var newDoorsList = [];
                 for(const row of results) {
-                    newDoorsList.push(new Door(row.lockID, row.door_name));
+                    newDoorsList.push(new DoorServer(row.lockID, row.door_name, row.uuid, row.isOpen));
                 }
                 socket.emit("fullDoorsListResponse", {doorsList: newDoorsList});
                 console.log("popup");
@@ -354,6 +373,48 @@ io.on('connection', (socket) => {
                 if (err) throw err;
                 console.log("permission data removed");
             });
+        }
+    });
+
+    socket.on("openDoor", (data) => {
+        console.log("opening doors with id: " + data.doorId);
+        socket.emit("openLock", {doorId: data.doorId});
+    });
+
+    socket.on("closeDoor", (data) => {
+        console.log("closing doors with id: " + data.doorId);
+        socket.emit("closeLock", {doorId: data.doorId});
+    });
+
+    socket.on("quickOpenDoor", (data) => {
+        console.log("opening doors for 10 seconds with id: " + data.doorId);
+        socket.emit("quickOpenLock", {doorId: data.doorId});
+        
+    });
+
+    socket.on("openLockResponse", (data) => {
+        console.log("response");
+        if(data.didOpen) {
+            console.log("didOpen true");
+            var openDoorQuery = 'UPDATE doors SET isOpen = 1 WHERE uuid="' + data.uuid + '";';
+            connection.query(openDoorQuery, function(err){
+                if(err) throw err;
+            });
+        }
+    });
+
+    socket.on("closeLockResponse", (data) =>{
+        if(data.didClose) {
+            var closeDoorQuery = 'UPDATE doors SET isOpen = 0 WHERE uuid="' + data.uuid + '";';
+            connection.query(closeDoorQuery, function(err){
+                if(err) throw err;
+            });
+        }
+    });
+    
+    socket.on("quickOpenLockResponse", (data) => {
+        if(data.didOpen) {
+            console.log("opened for 10 seconds");
         }
     });
 });
