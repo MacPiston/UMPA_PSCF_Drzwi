@@ -16,7 +16,6 @@ export const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'center',
     textAlign: 'center',
   },

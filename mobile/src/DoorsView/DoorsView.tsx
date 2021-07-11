@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   LayoutAnimation,
@@ -7,20 +7,14 @@ import {
   ScrollView,
   Pressable,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation, useRoute } from '@react-navigation/core';
-import { styles } from './Stylesheets/Stylesheets';
+import Icon from 'react-native-vector-icons/Feather';
+import { io } from 'socket.io-client';
 import ExpandableItem from './ExpandableItem';
+import Door from './DoorType';
+import { styles } from './Stylesheets/Stylesheets';
 import { DoorsScreenRouteProp, MainStackParams } from '../Navigation/Params';
-import { SocketContext } from '../SocketIO/socket.provider';
-
-interface Door {
-  doorName: string;
-  lockID: string;
-  inBtRange: boolean;
-  isExpanded: boolean;
-}
 
 type doorsScreenProp = StackNavigationProp<MainStackParams, 'Doors'>;
 
@@ -28,8 +22,13 @@ const DoorsView: React.FC = () => {
   const [doorList, setDoorList] = useState<Door[]>([]);
   const navigation = useNavigation<doorsScreenProp>();
   const { params } = useRoute<DoorsScreenRouteProp>();
-  const { email } = params;
-  const { socket } = useContext(SocketContext);
+  const { email, address } = params;
+
+  const socket = io(address, { transports: ['websocket'] });
+
+  socket.on('connect', () => {
+    console.log('connected');
+  });
 
   const refreshDoorList = () => {
     socket.emit('doorsList', { email });
@@ -40,6 +39,7 @@ const DoorsView: React.FC = () => {
 
   const logOut = () => {
     socket.disconnect();
+    // TODO powrót do widoku logowania
     navigation.navigate('Login');
   };
 
@@ -73,7 +73,7 @@ const DoorsView: React.FC = () => {
       <View style={styles.headerRow}>
         <Pressable
           onPress={() => {
-            alert('Zostałeś wylogowany');
+            // alert('Zostałeś wylogowany');
             logOut();
             console.log('User is logged out');
           }}

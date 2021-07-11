@@ -4,6 +4,7 @@ export type MainStackParams = {
   Login: undefined;
   Doors: {
     email: string;
+    address: string;
   };
 };
 
