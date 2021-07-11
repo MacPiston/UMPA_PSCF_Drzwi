@@ -6,7 +6,12 @@ import React, {
   useState,
   useContext,
 } from 'react';
-import { RefreshControl, KeyboardAvoidingView, TextInput } from 'react-native';
+import {
+  RefreshControl,
+  KeyboardAvoidingView,
+  TextInput,
+  Platform,
+} from 'react-native';
 import { io } from 'socket.io-client';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/core';
@@ -243,7 +248,12 @@ const LoginView: React.FC = () => {
             onPress={() => setModalVisible(true)}
           />
         </ButtonsContainer>
-        {isModalVisible && <StyledBlurView blurType="regular" blurAmount={1} />}
+        {isModalVisible && (
+          <StyledBlurView
+            blurType={Platform.OS === 'ios' ? 'regular' : 'dark'}
+            blurAmount={1}
+          />
+        )}
         <AccountModal
           visible={isModalVisible}
           handleClose={() => setModalVisible(false)}
