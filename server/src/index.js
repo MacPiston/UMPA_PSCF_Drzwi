@@ -257,7 +257,7 @@ io.on('connection', (socket) => {
             } else {
 
                 for(const row of results) {
-                    doorsList.push(new Door(row.lockID, row.doorName));
+                    doorsList.push(new Door(row.lockID, row.door_name));
                 }
                 socket.emit('doors', {doorsList: doorsList});
                 console.log(doorsList);
