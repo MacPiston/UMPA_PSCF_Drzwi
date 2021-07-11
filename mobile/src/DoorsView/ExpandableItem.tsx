@@ -1,14 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { styles } from './Stylesheets/Stylesheets';
+import Door from './DoorType';
 
-const ExpandableItem = ({ item, onPressFunction }) => {
+interface ItemProps {
+  item: Door;
+  onPressFunction: () => void;
+}
+
+const ExpandableItem = ({ item, onPressFunction }: ItemProps): JSX.Element => {
   // Custom Component for the Expandable List
-  const [layoutHeight, setLayoutHeight] = useState(0);
+  const [layoutHeight, setLayoutHeight] = useState<number | undefined>(0);
 
   useEffect(() => {
     if (item.isExpanded) {
-      setLayoutHeight(null);
+      setLayoutHeight(undefined);
     } else {
       setLayoutHeight(0);
     }
