@@ -1,7 +1,13 @@
 /* eslint-disable global-require */
-import React, { useEffect, useReducer, useRef, useState } from 'react';
+import React, {
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+  useContext,
+} from 'react';
 import { RefreshControl, KeyboardAvoidingView, TextInput } from 'react-native';
-import { io, Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/core';
 import { Styles } from './Stylesheets/Stylesheets';
@@ -28,6 +34,7 @@ import {
   ActionState,
 } from './ServersReducer';
 import { MainStackParams } from '../Navigation/Params';
+import { SocketContext } from '../SocketIO/socket.provider';
 
 type loginScreenProp = StackNavigationProp<MainStackParams, 'Login'>;
 
@@ -53,7 +60,8 @@ const LoginView: React.FC = () => {
   const [isRefreshing, setRefreshing] = useState<boolean>(false);
   const [loginState, setLoginState] = useState<number>(loginStates.disabled);
 
-  const [socket, setSocket] = useState<Socket>(io());
+  // const [socket, setSocket] = useState<Socket>(io());
+  const { socket, setSocket } = useContext(SocketContext);
 
   const navigation = useNavigation<loginScreenProp>();
 
@@ -69,7 +77,6 @@ const LoginView: React.FC = () => {
     fetchServersAsync();
 
     return () => {
-      // if (socket) socket.disconnect();
       srvDispatch({ type: DisconnectAll });
     };
   }, []);
@@ -82,8 +89,6 @@ const LoginView: React.FC = () => {
   }, [servers]);
 
   const handleRefresh = async () => {
-    // if (socket) socket.disconnect();
-
     setRefreshing(true);
     setSelectedServer(null);
 
@@ -114,7 +119,6 @@ const LoginView: React.FC = () => {
     const { ip } = passedServer;
 
     setLoginState(loginStates.disabled);
-    // if (socket) socket.disconnect();
 
     emailInputRef.current.clear();
     pwdInputRef.current.clear();
@@ -140,21 +144,19 @@ const LoginView: React.FC = () => {
   };
 
   const handleLogin = async () => {
-    if (socket?.connected) {
-      console.log('logging in');
+    if (socket.connected) {
       setLoginState(loginStates.loading);
       setTimeout(
-        () => socket?.emit('loginRequest', { email, password: pwd }),
+        () => socket.emit('loginRequest', { email, password: pwd }),
         600,
       );
     }
   };
 
   const handleLoginResponse = async (response: boolean) => {
-    console.log(response);
     if (response) {
       setLoginState(loginStates.loginSuccess);
-      if (socket !== undefined) navigation.navigate('Doors', { socket, email });
+      if (socket !== undefined) navigation.navigate('Doors', { email });
     } else {
       setLoginState(loginStates.loginFailed);
       setTimeout(() => setLoginState(loginStates.enabled), 3000);

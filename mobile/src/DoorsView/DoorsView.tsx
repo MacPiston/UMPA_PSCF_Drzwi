@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
   SafeAreaView,
   LayoutAnimation,
@@ -13,6 +13,7 @@ import { useNavigation, useRoute } from '@react-navigation/core';
 import { styles } from './Stylesheets/Stylesheets';
 import ExpandableItem from './ExpandableItem';
 import { DoorsScreenRouteProp, MainStackParams } from '../Navigation/Params';
+import { SocketContext } from '../SocketIO/socket.provider';
 
 interface Door {
   doorName: string;
@@ -27,7 +28,8 @@ const DoorsView: React.FC = () => {
   const [doorList, setDoorList] = useState<Door[]>([]);
   const navigation = useNavigation<doorsScreenProp>();
   const { params } = useRoute<DoorsScreenRouteProp>();
-  const { socket, email } = params;
+  const { email } = params;
+  const { socket } = useContext(SocketContext);
 
   const refreshDoorList = () => {
     socket.emit('doorsList', { email });
@@ -38,7 +40,6 @@ const DoorsView: React.FC = () => {
 
   const logOut = () => {
     socket.disconnect();
-    // TODO powrót do widoku logowania
     navigation.navigate('Login');
   };
 
