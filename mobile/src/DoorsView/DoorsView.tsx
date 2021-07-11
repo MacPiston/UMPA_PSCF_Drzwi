@@ -12,15 +12,9 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation, useRoute } from '@react-navigation/core';
 import { styles } from './Stylesheets/Stylesheets';
 import ExpandableItem from './ExpandableItem';
+import Door from './DoorType';
 import { DoorsScreenRouteProp, MainStackParams } from '../Navigation/Params';
 import { SocketContext } from '../SocketIO/socket.provider';
-
-interface Door {
-  doorName: string;
-  lockID: string;
-  inBtRange: boolean;
-  isExpanded: boolean;
-}
 
 type doorsScreenProp = StackNavigationProp<MainStackParams, 'Doors'>;
 

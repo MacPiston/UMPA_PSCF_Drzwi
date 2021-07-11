@@ -16,7 +16,6 @@ export const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'center',
     textAlign: 'center',
   },
@@ -52,6 +51,7 @@ export const styles = StyleSheet.create({
   },
   accordionHeaderText: {
     fontSize: 24,
+    textAlign: 'left',
   },
   accordionListElement: {
     paddingLeft: 50,
