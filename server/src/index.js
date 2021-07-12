@@ -119,15 +119,15 @@ io.on('connection', (socket) => {
         connection.query(loginQuery, function (error, result, field) {
             if (error) {
                 console.log("Login user email =" + data.email + " with password =" + data.password + ": failed");
-                socket.emit('loginRequestRes', ("false"));
+                socket.emit('loginRequestRes', false);
                 throw error;
             }
             if (result.length > 0) {
                 console.log("Login user email=" + data.email + " with password=" + data.password+ ": success");
-                socket.emit('loginRequestRes', ("true"));
+                socket.emit('loginRequestRes', true);
             } else {
                 console.log("Login user email=" + data.email + " with password=" + data.password+ ": failed");
-                socket.emit('loginRequestRes', ("false"));
+                socket.emit('loginRequestRes', false);
             }
         });
     });
@@ -248,6 +248,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('doorsList', (data) => {
+        console.log(data);
         console.log("Doors List emited");
         var usersDoorsQuery = 'select * from doors WHERE lockID IN (select lockID from permissions WHERE email="'+ data.email +'");';
         var doorsList = [];
