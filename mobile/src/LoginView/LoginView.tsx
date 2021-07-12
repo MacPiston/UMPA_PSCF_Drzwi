@@ -52,6 +52,7 @@ const LoginView: React.FC = () => {
     DeleteServer,
     LoadServers,
   } = ActionState;
+
   const [email, setEmail] = useState<string>('');
   const [pwd, setPwd] = useState<string>('');
   const emailInputRef = useRef() as React.MutableRefObject<TextInput>;
@@ -65,7 +66,6 @@ const LoginView: React.FC = () => {
   const [isRefreshing, setRefreshing] = useState<boolean>(false);
   const [loginState, setLoginState] = useState<number>(loginStates.disabled);
 
-  // const [socket, setSocket] = useState<Socket>(io());
   const { socket, setSocket } = useContext(SocketContext);
 
   const navigation = useNavigation<loginScreenProp>();
@@ -97,9 +97,6 @@ const LoginView: React.FC = () => {
     setRefreshing(true);
     setSelectedServer(null);
 
-    emailInputRef.current.clear();
-    pwdInputRef.current.clear();
-
     await setTimeout(() => setRefreshing(false), 1500);
   };
 
@@ -120,13 +117,20 @@ const LoginView: React.FC = () => {
     }
   };
 
+  const handleLoginResponse = (response: boolean) => {
+    if (response) {
+      setLoginState(loginStates.loginSuccess);
+      navigation.navigate('Doors', { email });
+    } else {
+      setLoginState(loginStates.loginFailed);
+      setTimeout(() => setLoginState(loginStates.enabled), 3000);
+    }
+  };
+
   const handleConnection = (passedServer: server) => {
     const { ip } = passedServer;
 
     setLoginState(loginStates.disabled);
-
-    emailInputRef.current.clear();
-    pwdInputRef.current.clear();
 
     if (ip && ip !== '') {
       const address = 'http://'.concat(ip).concat(':4000');
@@ -140,10 +144,6 @@ const LoginView: React.FC = () => {
         setLoginState(loginStates.disabled);
         srvDispatch({ type: DisconnectAll });
       });
-      tempsocket.on('loginRequestRes', async (data) =>
-        // eslint-disable-next-line no-use-before-define
-        handleLoginResponse(data),
-      );
       setSocket(tempsocket);
     }
   };
@@ -151,20 +151,13 @@ const LoginView: React.FC = () => {
   const handleLogin = async () => {
     if (socket.connected) {
       setLoginState(loginStates.loading);
+      socket.on('loginRequestRes', (data) => {
+        handleLoginResponse(data);
+      });
       setTimeout(
         () => socket.emit('loginRequest', { email, password: pwd }),
         600,
       );
-    }
-  };
-
-  const handleLoginResponse = async (response: boolean) => {
-    if (response) {
-      setLoginState(loginStates.loginSuccess);
-      if (socket !== undefined) navigation.navigate('Doors', { email });
-    } else {
-      setLoginState(loginStates.loginFailed);
-      setTimeout(() => setLoginState(loginStates.enabled), 3000);
     }
   };
 
