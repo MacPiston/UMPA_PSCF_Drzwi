@@ -18,6 +18,7 @@ import BleManager from 'react-native-ble-manager';
 import { styles } from './Stylesheets/Stylesheets';
 import ExpandableItem from './ExpandableItem';
 import Door from './DoorType';
+import BtDevice from './BtType';
 import { DoorsScreenRouteProp, MainStackParams } from '../Navigation/Params';
 import { SocketContext } from '../SocketIO/socket.provider';
 
@@ -32,10 +33,11 @@ const DoorsView: React.FC = () => {
   const { email } = params;
   const { socket } = useContext(SocketContext);
   const [isScanning, setIsScanning] = useState(false);
-  const [bleList, setBleList] = useState([]);
+  const [bleList, setBleList] = useState<BtDevice[]>([]);
   const peripherals = new Map();
 
   const refreshDoorList = () => {
+    console.log('email : '.concat(email));
     socket.emit('doorsList', { email });
   };
 
@@ -50,8 +52,10 @@ const DoorsView: React.FC = () => {
 
   socket.on('doors', (data: DataType) => {
     const array = data.doorsList.map((item) => ({
-      doorName: item.doorName,
       lockID: item.lockID,
+      doorName: item.doorName,
+      uuid: item.uuid,
+      isOpen: item.isOpen,
       inBtRange: false,
       isExpanded: false,
     }));
@@ -71,7 +75,7 @@ const DoorsView: React.FC = () => {
 
   const startScan = () => {
     if (!isScanning) {
-      BleManager.scan([], 5, true)
+      BleManager.scan([], 5, false)
         .then((results) => {
           console.log('Scanning...');
           setIsScanning(true);
@@ -84,85 +88,98 @@ const DoorsView: React.FC = () => {
 
   const handleStopScan = () => {
     console.log('Scan is stopped');
-    console.log(bleList);
     setIsScanning(false);
     BleManager.getDiscoveredPeripherals().then((peripheralsArray) => {
       // Success code
-      // setBleList(peripheralsArray);
-      console.log('Discovered peripherals: ' + peripheralsArray.length);
-      console.log(peripheralsArray[0].id);
+      console.log('Discovered peripherals: '.concat(peripheralsArray.length));
+      console.log(peripheralsArray);
+      peripheralsArray.forEach((device) =>
+        console.log(device.advertising.serviceUUIDs),
+      );
     });
   };
 
-  // const handleDisconnectedPeripheral = (data) => {
-  //   const peripheral = peripherals.get(data.peripheral);
-  //   if (peripheral) {
-  //     peripheral.connected = false;
-  //     peripherals.set(peripheral.id, peripheral);
-  //     setBleList(Array.from(peripherals.values()));
-  //   }
-  //   console.log('Disconnected from ' + data.peripheral);
-  // };
+  const handleDisconnectedPeripheral = (data) => {
+    const peripheral = peripherals.get(data.peripheral);
+    if (peripheral) {
+      peripheral.connected = false;
+      peripherals.set(peripheral.id, peripheral);
+      setBleList(Array.from(peripherals.values()));
+    }
+    console.log('Disconnected from '.concat(data.peripheral));
+  };
 
-  // const handleUpdateValueForCharacteristic = (data) => {
-  //   console.log(
-  //     'Received data from ' +
-  //       data.peripheral +
-  //       ' characteristic ' +
-  //       data.characteristic,
-  //     data.value,
-  //   );
-  // };
+  const handleUpdateValueForCharacteristic = (data) => {
+    console.log(
+      'Received data from '
+        .concat(data.peripheral)
+        .concat(' characteristic ')
+        .concat(data.characteristic),
+      data.value,
+    );
+  };
 
-  // const retrieveConnected = () => {
-  //   BleManager.getConnectedPeripherals([]).then((results) => {
-  //     if (results.length === 0) {
-  //       console.log('No connected peripherals');
-  //     }
-  //     console.log(results);
-  //     for (let i = 0; i < results.length; i++) {
-  //       var peripheral = results[i];
-  //       peripheral.connected = true;
-  //       peripherals.set(peripheral.id, peripheral);
-  //       setBleList(Array.from(peripherals.values()));
-  //     }
-  //   });
-  // };
+  const retrieveConnected = () => {
+    BleManager.getConnectedPeripherals([]).then((results) => {
+      if (results.length === 0) {
+        console.log('No connected peripherals');
+      }
+      console.log(results);
+      for (let i = 0; i < results.length; i += 1) {
+        const peripheral = results[i];
+        peripheral.connected = true;
+        peripherals.set(peripheral.id, peripheral);
+        setBleList(Array.from(peripherals.values()));
+      }
+    });
+  };
 
   const handleDiscoverPeripheral = (peripheral) => {
-    console.log('Got ble peripheral', peripheral);
+    // console.log('Got ble peripheral', peripheral);
     if (!peripheral.name) {
-      peripheral.name = 'NO NAME';
+      peripheral.name = Math.random().toString(36).substring(7);
     }
     peripherals.set(peripheral.id, peripheral);
-    // const array = peripherals.values();
     setBleList(Array.from(peripherals.values()));
   };
 
   useEffect(() => {
     refreshDoorList();
-    BleManager.start({ showAlert: false });
+
+    BleManager.enableBluetooth()
+      .then(() => {
+        // Success code
+        console.log('The bluetooth is already enabled or the user confirm');
+      })
+      .catch((error) => {
+        // Failure code
+        console.log('The user refuse to enable bluetooth');
+      });
+
+    BleManager.start({ showAlert: false }).then(() => {
+      console.log('Module initialized');
+    });
 
     bleManagerEmitter.addListener(
       'BleManagerDiscoverPeripheral',
       handleDiscoverPeripheral,
     );
     bleManagerEmitter.addListener('BleManagerStopScan', handleStopScan);
-    // bleManagerEmitter.addListener(
-    //   'BleManagerDisconnectPeripheral',
-    //   handleDisconnectedPeripheral,
-    // );
-    // bleManagerEmitter.addListener(
-    //   'BleManagerDidUpdateValueForCharacteristic',
-    //   handleUpdateValueForCharacteristic,
-    // );
+    bleManagerEmitter.addListener(
+      'BleManagerDisconnectPeripheral',
+      handleDisconnectedPeripheral,
+    );
+    bleManagerEmitter.addListener(
+      'BleManagerDidUpdateValueForCharacteristic',
+      handleUpdateValueForCharacteristic,
+    );
 
     if (Platform.OS === 'android' && Platform.Version >= 29) {
       PermissionsAndroid.check(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
       ).then((result) => {
         if (result) {
-          console.log('Permission is OK');
+          console.log('Permission is OK (API >=29)');
         } else {
           PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -184,7 +201,7 @@ const DoorsView: React.FC = () => {
         PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
       ).then((result) => {
         if (result) {
-          console.log('Permission is OK');
+          console.log('Permission is OK (API < 23;28 >)');
         } else {
           PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
@@ -209,14 +226,14 @@ const DoorsView: React.FC = () => {
         handleDiscoverPeripheral,
       );
       bleManagerEmitter.removeListener('BleManagerStopScan', handleStopScan);
-      // bleManagerEmitter.removeListener(
-      //   'BleManagerDisconnectPeripheral',
-      //   handleDisconnectedPeripheral,
-      // );
-      // bleManagerEmitter.removeListener(
-      //   'BleManagerDidUpdateValueForCharacteristic',
-      //   handleUpdateValueForCharacteristic,
-      // );
+      bleManagerEmitter.removeListener(
+        'BleManagerDisconnectPeripheral',
+        handleDisconnectedPeripheral,
+      );
+      bleManagerEmitter.removeListener(
+        'BleManagerDidUpdateValueForCharacteristic',
+        handleUpdateValueForCharacteristic,
+      );
     };
   }, []);
 
@@ -232,37 +249,38 @@ const DoorsView: React.FC = () => {
         >
           <Icon name="log-out" style={styles.headerButton} />
         </Pressable>
-        <Text style={styles.headerText}>Dostępne drzwi</Text>
+        <Text style={styles.headerText}>Available doors</Text>
         <Pressable
           onPress={() => {
-            // console.log('Available doors list has been refreshed');
-            // refreshDoorList();
+            console.log('Available doors list has been refreshed');
             console.log('Scanning bluetooth devices');
+            // setBleList([]);
             startScan();
+            refreshDoorList();
           }}
         >
           <Icon name="refresh-ccw" style={styles.headerButton} />
         </Pressable>
       </View>
       <ScrollView>
-        {/* {doorList?.map((door, key) => (
+        {doorList?.map((door, key) => (
           <ExpandableItem
-            key={door.doorName}
+            key={door.lockID}
             onPressFunction={() => {
               updateLayout(key);
             }}
             item={door}
           />
-        ))} */}
-        {bleList?.map((device, key) => (
-          <ExpandableItem
-            key={device.id}
+        ))}
+        {/* {bleList?.map((device, key) => (
+          <BtExpandableItem
+            key={device.lockName}
             onPressFunction={() => {
               updateLayout(key);
             }}
             item={device}
           />
-        ))}
+        ))} */}
       </ScrollView>
     </SafeAreaView>
   );

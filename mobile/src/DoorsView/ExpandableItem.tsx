@@ -45,8 +45,8 @@ const ExpandableItem = ({ item, onPressFunction }: ItemProps): JSX.Element => {
           style={styles.accordionListElement}
           onPress={() =>
             item.inBtRange
-              ? alert('Otwarto ' + item.doorName)
-              : alert(item.doorName + ' nie jest w zasięgu')
+              ? alert('Otwarto '.concat(item.doorName))
+              : alert(item.doorName.concat(' nie jest w zasięgu'))
           }
         >
           <Text style={styles.accordionListElementText}>Otwórz drzwi</Text>

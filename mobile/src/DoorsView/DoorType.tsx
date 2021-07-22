@@ -1,6 +1,8 @@
 interface Door {
-  doorName: string;
   lockID: string;
+  doorName: string;
+  uuid: string;
+  isOpen: boolean;
   inBtRange: boolean;
   isExpanded: boolean;
 }
