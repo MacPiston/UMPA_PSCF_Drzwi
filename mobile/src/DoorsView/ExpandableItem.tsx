@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { styles } from './Stylesheets/Stylesheets';
 import Door from './DoorType';
+import { ListItem } from 'react-native-elements/dist/list/ListItem';
 
 interface ItemProps {
   item: Door;
