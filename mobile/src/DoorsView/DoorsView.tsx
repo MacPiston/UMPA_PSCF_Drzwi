@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import React, { useEffect, useState, useContext } from 'react';
 import {
   SafeAreaView,
@@ -27,7 +28,7 @@ const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
 const DoorsView: React.FC = () => {
-  const [doorList, setDoorList] = useState<Door[]>([]);
+  const [doorsList, setDoorsList] = useState<Door[]>([]);
   const navigation = useNavigation<doorsScreenProp>();
   const { params } = useRoute<DoorsScreenRouteProp>();
   const { email } = params;
@@ -37,7 +38,7 @@ const DoorsView: React.FC = () => {
   const [UUIDsList, setUUIDsList] = useState<string[]>([]);
   const peripherals = new Map();
 
-  const refreshDoorList = () => {
+  const refreshdoorsList = () => {
     socket.emit('doorsList', { email });
   };
 
@@ -59,32 +60,19 @@ const DoorsView: React.FC = () => {
       inBtRange: false,
       isExpanded: false,
     }));
-    setDoorList(array);
+    setDoorsList(array);
   });
 
   const updateLayout = (index: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    const array = [...doorList];
-    array.map((value, placeindex) =>
-      placeindex === index
-        ? (array[placeindex].isExpanded = !array[placeindex].isExpanded)
-        : (array[placeindex].isExpanded = false),
-    );
-    setDoorList(array);
-  };
-
-  const updateInBtRange = (UUID: string) => {
-    // UUIDsList.map((uuid) => {
-    //   if (UUID === uuid) {
-    //     return true;
-    //   }
-    // });
-    for (const uuid of UUIDsList) {
-      if (UUID == uuid) {
-        return true;
-      }
-    }
-    return false;
+    const array = [...doorsList];
+    array.forEach((value, placeindex) => {
+      value.isExpanded =
+        placeindex === index
+          ? (array[placeindex].isExpanded = !array[placeindex].isExpanded)
+          : (array[placeindex].isExpanded = false);
+    });
+    setDoorsList(array);
   };
 
   const startScan = () => {
@@ -98,6 +86,15 @@ const DoorsView: React.FC = () => {
           console.error(err);
         });
     }
+  };
+
+  const updateInBtRange = (UUID: string) => {
+    for (const uuid of UUIDsList) {
+      if (UUID == uuid) {
+        return true;
+      }
+    }
+    return false;
   };
 
   const handleStopScan = () => {
@@ -116,33 +113,31 @@ const DoorsView: React.FC = () => {
       }
       setUUIDsList(tempArray);
     });
-    doorList.forEach((door: Door) => {
+    const array = [...doorsList];
+    array.forEach((door: Door) => {
       if (updateInBtRange(door.uuid) === true) {
         door.inBtRange = true;
       } else {
         door.inBtRange = false;
       }
     });
-    console.log(doorList);
+    setDoorsList(array);
   };
 
   const handleDiscoverPeripheral = (peripheral: Peripheral) => {
-    // console.log('Got ble peripheral', peripheral);
     peripherals.set(peripheral.id, peripheral);
     setBleList(Array.from(peripherals.values()));
   };
 
   useEffect(() => {
-    refreshDoorList();
+    refreshdoorsList();
+  }, []);
 
+  useEffect(() => {
     BleManager.enableBluetooth()
-      .then(() => {
-        // Success code
-        console.log('The bluetooth is already enabled or the user confirm');
-      })
-      .catch((error) => {
-        // Failure code
-        console.log('The user refuse to enable bluetooth');
+      .then()
+      .catch(() => {
+        logOut();
       });
 
     BleManager.start({ showAlert: false }).then(() => {
@@ -201,21 +196,19 @@ const DoorsView: React.FC = () => {
     startScan();
 
     return () => {
-      console.log('unmount');
       bleManagerEmitter.removeListener(
         'BleManagerDiscoverPeripheral',
         handleDiscoverPeripheral,
       );
       bleManagerEmitter.removeListener('BleManagerStopScan', handleStopScan);
     };
-  }, []);
+  }, [doorsList]);
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerRow}>
         <Pressable
           onPress={() => {
-            // alert('Zostałeś wylogowany');
             logOut();
             console.log('User is logged out');
           }}
@@ -225,18 +218,15 @@ const DoorsView: React.FC = () => {
         <Text style={styles.headerText}>Available doors</Text>
         <Pressable
           onPress={() => {
-            console.log('Available doors list has been refreshed');
-            console.log('Scanning bluetooth devices');
-            // setBleList([]);
+            refreshdoorsList();
             startScan();
-            refreshDoorList();
           }}
         >
           <Icon name="refresh-ccw" style={styles.headerButton} />
         </Pressable>
       </View>
       <ScrollView>
-        {doorList?.map((door, key) => (
+        {doorsList?.map((door, key) => (
           <ExpandableItem
             key={door.lockID}
             onPressFunction={() => {

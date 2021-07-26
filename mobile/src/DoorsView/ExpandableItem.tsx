@@ -25,6 +25,7 @@ const ExpandableItem = ({ item, onPressFunction }: ItemProps): JSX.Element => {
     <View>
       {/* Header of the Expandable List Item */}
       <TouchableOpacity
+        key={item.inBtRange.valueOf.toString()}
         activeOpacity={0.8}
         onPress={onPressFunction}
         style={[
