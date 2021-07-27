@@ -18,7 +18,7 @@ import { useNavigation, useRoute } from '@react-navigation/core';
 import BleManager from 'react-native-ble-manager';
 import { styles } from './Stylesheets/Stylesheets';
 import ExpandableItem from './ExpandableItem';
-import Door from './DoorType';
+import { Door } from './DoorType';
 import { Peripheral } from './BtTypes';
 import { DoorsScreenRouteProp, MainStackParams } from '../Navigation/Params';
 import { SocketContext } from '../SocketIO/socket.provider';
@@ -78,7 +78,7 @@ const DoorsView: React.FC = () => {
   const startScan = () => {
     if (!isScanning) {
       BleManager.scan([], 5, false)
-        .then((results) => {
+        .then(() => {
           console.log('Scanning...');
           setIsScanning(true);
         })
@@ -129,6 +129,14 @@ const DoorsView: React.FC = () => {
     setBleList(Array.from(peripherals.values()));
   };
 
+  const lockLongOpen = (doorId: string) => {
+    socket.emit('openDoor', { doorId });
+  };
+
+  const lockQuickOpen = (doorId: string) => {
+    socket.emit('quickOpenDoor', { doorId });
+  };
+
   useEffect(() => {
     refreshdoorsList();
   }, []);
@@ -159,8 +167,8 @@ const DoorsView: React.FC = () => {
         } else {
           PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          ).then((result) => {
-            if (result) {
+          ).then((result2) => {
+            if (result2) {
               console.log('User accept');
             } else {
               console.log('User refuse');
@@ -181,8 +189,8 @@ const DoorsView: React.FC = () => {
         } else {
           PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
-          ).then((result) => {
-            if (result) {
+          ).then((result2) => {
+            if (result2) {
               console.log('User accept');
             } else {
               console.log('User refuse');
@@ -219,7 +227,6 @@ const DoorsView: React.FC = () => {
         <Pressable
           onPress={() => {
             refreshdoorsList();
-            startScan();
           }}
         >
           <Icon name="refresh-ccw" style={styles.headerButton} />
@@ -231,6 +238,12 @@ const DoorsView: React.FC = () => {
             key={door.lockID}
             onPressFunction={() => {
               updateLayout(key);
+            }}
+            longOpenFunction={() => {
+              lockLongOpen(door.uuid);
+            }}
+            quickOpenFunction={() => {
+              lockQuickOpen(door.uuid);
             }}
             item={door}
           />

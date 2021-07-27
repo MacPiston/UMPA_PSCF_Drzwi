@@ -54,6 +54,7 @@ export const styles = StyleSheet.create({
     textAlign: 'left',
   },
   accordionListElement: {
+    padding: 2,
     paddingLeft: 50,
     paddingRight: 50,
   },

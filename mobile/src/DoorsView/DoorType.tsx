@@ -1,4 +1,4 @@
-interface Door {
+export interface Door {
   lockID: string;
   doorName: string;
   uuid: string;
@@ -7,4 +7,6 @@ interface Door {
   isExpanded: boolean;
 }
 
-export default Door;
+export interface ServerResponse {
+  doorsList: Door[];
+}
