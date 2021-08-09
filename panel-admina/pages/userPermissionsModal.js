@@ -82,8 +82,8 @@ const PermissionPopup = props => {
                 <h1> Edit permissions for user: {props.user} </h1>
                 <div className={styles.tableheader}>
                     <div>Lp.</div>
-                    <div>Lock IP</div>
-                    <div>Door Name</div>
+                    <div>IP</div>
+                    <div>Name</div>
                     <div>UUID</div>
                     <div>Permission</div>
                 </div>

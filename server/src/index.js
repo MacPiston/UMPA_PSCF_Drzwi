@@ -187,8 +187,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('addDoors', (data) => {
-        var addDoorQuery = 'insert ignore into doors (lockID, door_name) values ("'
-            + data.lockID + '", "' + data.doorName + '");';
+        var addDoorQuery = 'insert ignore into doors (lockID, door_name, uuid) values ("'
+            + data.lockID + '", "' + data.doorName + '", "' + data.uuid + '");';
 
         connection.query(addDoorQuery, function(err, result, fields) {
             if(err) {
@@ -296,6 +296,19 @@ io.on('connection', (socket) => {
         });
     });
 
+    socket.on("editUUID", (data) => {
+        console.log("editing uuid");
+        var editUUIDQuery = 'UPDATE doors SET uuid = "' + data.newUUID + '" WHERE lockID="' + data.oldLockID + '";';
+        connection.query(editUUIDQuery, function(err){
+            if(err) {
+                console.log("Couldnt update door: " + data.oldLockID + " with new uuid: " + data.newUUID);
+                throw err;
+            } else {
+                console.log("Successfully updated door with uuid: " + data.newUUID);
+            }
+        });
+    });
+
     socket.on("editDoorName", (data) => {
         console.log("editing door name");
         console.log(data.newDoorName)
@@ -357,7 +370,7 @@ io.on('connection', (socket) => {
 
     socket.on("addPermissions", (data) => {
         for(const perm of data.addQueries) {
-            var addPermisQuery = 'insert ignore into permissions (lockID, email) values ("' + perm.lockID + 
+            var addPermisQuery = 'insert ignore into permissions (lockID, email) values ("' + perm.lockID +
             '", "' + perm.email + '");';
             connection.query(addPermisQuery, function(err) {
                 if (err) throw err;
@@ -368,7 +381,7 @@ io.on('connection', (socket) => {
 
     socket.on("deletePermissions", (data) => {
         for(const perm of data.deleteQueries) {
-            
+
             var deletePermisQuery = 'DELETE from permissions where email = "' + perm.email + '" AND lockID="' + perm.lockID + '";';
             connection.query(deletePermisQuery, function(err) {
                 if (err) throw err;
@@ -390,7 +403,7 @@ io.on('connection', (socket) => {
     socket.on("quickOpenDoor", (data) => {
         console.log("opening doors for 10 seconds with id: " + data.doorId);
         socket.emit("quickOpenLock", {doorId: data.doorId});
-        
+
     });
 
     socket.on("openLockResponse", (data) => {
@@ -412,7 +425,7 @@ io.on('connection', (socket) => {
             });
         }
     });
-    
+
     socket.on("quickOpenLockResponse", (data) => {
         if(data.didOpen) {
             console.log("opened for 10 seconds");
