@@ -85,8 +85,8 @@ function DoorTable(props) {
         <div className={styles.table}>
             <div className={styles.tableheader}>
                 <div>Lp.</div>
-                <div>lockID</div>
-                <div>doorName</div>
+                <div>IP</div>
+                <div>NAME</div>
                 <div>UUID</div>
                 <div>status</div>
                 <div></div>
@@ -126,6 +126,7 @@ export default function Main() {
     const refresh = useForceUpdate();
     let doorIDAdd = React.createRef();
     let doorNameAdd = React.createRef();
+    let doorUUIDAdd = React.createRef();
 
     const [login, setLogin] = useState(true);
 
@@ -247,7 +248,7 @@ export default function Main() {
         editPermissionsDoor(lockID);
     }
 
-    function executeEdit(lockID, doorName) {
+    function executeEdit(lockID, doorName, UUID) {
         for (var door of doors) {
             if (door.lockID === lockIDState) {
                 if (doorName != "") {
@@ -256,6 +257,9 @@ export default function Main() {
                 } if (lockID != "") {
                     door.lockID = lockID;
                     socket.emit("editLockId", { newLockID: lockID, oldLockID: lockIDState });
+                } if (UUID != "") {
+                    door.uuid = UUID;
+                    socket.emit("editUUID", { newUUID: UUID, oldLockID: lockIDState });
                 }
             }
         }
@@ -289,8 +293,9 @@ export default function Main() {
         event.stopPropagation();
         let lockID = doorIDAdd.current.value;
         let doorName = doorNameAdd.current.value;
+        let UUID = doorUUIDAdd.current.value;
 
-        if (lockID == '' || doorName == '') {
+        if (lockID == '' || doorName == '' || UUID == '') {
             alert("Wypełnij wszystkie pola!");
             return;
         }
@@ -299,9 +304,10 @@ export default function Main() {
             return;
         }
 
-        socket.emit("addDoors", { lockID: doorIDAdd.current.value, doorName: doorNameAdd.current.value });
+        socket.emit("addDoors", { lockID: doorIDAdd.current.value, doorName: doorNameAdd.current.value, uuid: doorUUIDAdd.current.value });
         doorIDAdd.current.value = '';
         doorNameAdd.current.value = '';
+        doorUUIDAdd.current.value = '';
     }
 
     return (
@@ -318,9 +324,10 @@ export default function Main() {
                 <DoorTable items={doors} />
                 <div className={styles.box}>
                     <form className={styles.form} onSubmit={handleSubmitAdd}>
-                        <h2>Add door</h2>
-                        <input className={styles.inputtext} placeholder="DoorID" type="text" ref={doorIDAdd} />
-                        <input className={styles.inputtext} placeholder="DoorName" type="text" ref={doorNameAdd} />
+                        <h2>Create new door</h2>
+                        <input className={styles.inputtext} placeholder="IP" type="text" ref={doorIDAdd} />
+                        <input className={styles.inputtext} placeholder="Door name" type="text" ref={doorNameAdd} />
+                        <input className={styles.inputtext} placeholder="UUID" type="text" ref={doorUUIDAdd} />
                         <input className={styles.inputsubmit} type="submit" value="Add new door" />
                     </form>
                 </div>
