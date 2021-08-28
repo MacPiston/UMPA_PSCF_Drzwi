@@ -4,6 +4,7 @@
 #include <ArduinoJson.h>
 #include "settings.h"
 #include "io.h"
+#include "events.h"
 
 SocketIOclient socketIO;
 
@@ -45,11 +46,11 @@ void socketIOEvent(socketIOmessageType_t type, uint8_t *payload, size_t length)
         {
             DynamicJsonDocument responseData(256);
             char responseString[128];
-            if (strcmp(eventName, "openLock") == 0)
+            if (strcmp(eventName, OPEN_LOCK_EVENT) == 0)
             {
                 Serial.println("Lock opening");
                 openLock();
-                responseData[0] = "openLockResponse";
+                responseData[0] = OPEN_LOCK_RESPONSE;
                 responseData[1]["didOpen"] = true;
                 responseData[1]["uuid"] = LOCK_UUID;
                 serializeJson(responseData, responseString);
@@ -57,13 +58,13 @@ void socketIOEvent(socketIOmessageType_t type, uint8_t *payload, size_t length)
                 if (socketIO.sendEVENT(responseString))
                     Serial.printf("[SIO] Response sent: %s \n", responseString);
             }
-            else if (strcmp(eventName, "quickOpenLock") == 0)
+            else if (strcmp(eventName, QUICK_OPEN_EVENT) == 0)
             {
                 Serial.println("Lock quick-opening");
 
                 openLockTime();
 
-                responseData[0] = "quickOpenLockResponse";
+                responseData[0] = QUICK_OPEN_RESPONSE;
                 responseData[1]["didOpen"] = true;
                 responseData[1]["uuid"] = LOCK_UUID;
                 serializeJson(responseData, responseString);
@@ -71,11 +72,11 @@ void socketIOEvent(socketIOmessageType_t type, uint8_t *payload, size_t length)
                 if (socketIO.sendEVENT(responseString))
                     Serial.printf("[SIO] Response sent: %s \n", responseString);
             }
-            else if (strcmp(eventName, "closeLock") == 0)
+            else if (strcmp(eventName, CLOSE_LOCK_EVENT) == 0)
             {
                 Serial.println("Lock closing");
                 closeLock();
-                responseData[0] = "closeLockResponse";
+                responseData[0] = CLOSE_LOCK_RESPONSE;
                 responseData[1]["didClose"] = true;
                 responseData[1]["uuid"] = LOCK_UUID;
                 serializeJson(responseData, responseString);

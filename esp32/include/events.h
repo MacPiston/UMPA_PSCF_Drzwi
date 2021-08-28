@@ -1,0 +1,6 @@
+#define OPEN_LOCK_EVENT "openLock"
+#define OPEN_LOCK_RESPONSE "openLockResponse"
+#define QUICK_OPEN_EVENT "quickOpenLock"
+#define QUICK_OPEN_RESPONSE "quickOpenLockResponse"
+#define CLOSE_LOCK_EVENT "closeLock"
+#define CLOSE_LOCK_RESPONSE "closeLockResponse"
