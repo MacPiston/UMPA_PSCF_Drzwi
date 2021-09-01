@@ -15,18 +15,6 @@ const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 let isScanning = false;
 let UUIDsList: string[];
 let newDoorsList: Door[];
-const peripherals = new Map();
-
-// const [isScanning, setIsScanning] = useState(false);
-// const [bleList, setBleList] = useState([]);
-// const [UUIDsList, setUUIDsList] = useState<string[]>([]);
-// const [newDoorsList, setNewDoorsList] = useState<Door[]>([]);
-// const peripherals = new Map();
-
-const handleDiscoverPeripheral = (peripheral: Peripheral) => {
-  peripherals.set(peripheral.id, peripheral);
-  //   setBleList(Array.from(peripherals.values()));
-};
 
 const updateInBtRange = (UUID: string) => {
   let deviceFound = false;
@@ -72,10 +60,6 @@ export const initBTModule = () => {
     console.log('Module initialized');
   });
 
-  bleManagerEmitter.addListener(
-    'BleManagerDiscoverPeripheral',
-    handleDiscoverPeripheral,
-  );
   bleManagerEmitter.addListener('BleManagerStopScan', handleStopScan);
 };
 
@@ -137,10 +121,6 @@ export const startScan = () => {
 };
 
 export const disableBTModule = () => {
-  bleManagerEmitter.removeListener(
-    'BleManagerDiscoverPeripheral',
-    handleDiscoverPeripheral,
-  );
   bleManagerEmitter.removeListener('BleManagerStopScan', handleStopScan);
   BleManager.stopScan();
 };

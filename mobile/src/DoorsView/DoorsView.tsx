@@ -95,7 +95,7 @@ const DoorsView: React.FC = () => {
 
     const newDoorsList = getDoorsInRange(doorsList);
 
-    console.log(newDoorsList);
+    console.log('new doorslist'.concat(newDoorsList.toString()));
 
     setDoorsList(newDoorsList);
 
@@ -103,6 +103,10 @@ const DoorsView: React.FC = () => {
       disableBTModule();
     };
   }, []);
+
+  // useEffect(() => {
+  //   console.log('new doorslist'.concat(doorsList));
+  // }, [doorsList]);
 
   // useEffect(() => {
   //   socket.on('doors', (data: DataType) => {
