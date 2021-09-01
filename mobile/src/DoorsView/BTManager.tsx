@@ -1,5 +1,4 @@
 /* eslint-disable no-param-reassign */
-import { useState } from 'react';
 import {
   NativeModules,
   NativeEventEmitter,
@@ -37,7 +36,7 @@ const updateInBtRange = (UUID: string) => {
   return deviceFound;
 };
 
-const handleStopScan = (doorsList: Door[]) => {
+const handleStopScan = () => {
   console.log('Scan is stopped');
   isScanning = false;
   BleManager.getDiscoveredPeripherals().then((peripheralsArray) => {
@@ -53,6 +52,9 @@ const handleStopScan = (doorsList: Door[]) => {
     }
     UUIDsList = tempArray;
   });
+};
+
+export const getDoorsInRange = (doorsList: Door[]) => {
   const array = [...doorsList];
   array.forEach((door: Door) => {
     if (updateInBtRange(door.uuid) === true) {
@@ -62,9 +64,6 @@ const handleStopScan = (doorsList: Door[]) => {
     }
   });
   newDoorsList = array;
-};
-
-export const getDoorsInRange = () => {
   return newDoorsList;
 };
 

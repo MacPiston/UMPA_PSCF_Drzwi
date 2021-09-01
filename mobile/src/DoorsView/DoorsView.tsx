@@ -75,9 +75,9 @@ const DoorsView: React.FC = () => {
         logOut();
       });
     checkPermissionAndroid();
-  }, []);
 
-  useEffect(() => {
+    initBTModule();
+
     socket.on('doors', (data: DataType) => {
       const array = data.doorsList.map((item) => ({
         lockID: item.lockID,
@@ -90,17 +90,44 @@ const DoorsView: React.FC = () => {
       setDoorsList(array);
     });
 
-    initBTModule();
-
     console.log('Scanning bluetooth devices');
     startScan();
 
-    setDoorsList(getDoorsInRange());
+    const newDoorsList = getDoorsInRange(doorsList);
+
+    console.log(newDoorsList);
+
+    setDoorsList(newDoorsList);
 
     return () => {
       disableBTModule();
     };
-  }, [doorsList]);
+  }, []);
+
+  // useEffect(() => {
+  //   socket.on('doors', (data: DataType) => {
+  //     const array = data.doorsList.map((item) => ({
+  //       lockID: item.lockID,
+  //       doorName: item.doorName,
+  //       uuid: item.uuid,
+  //       isOpen: item.isOpen,
+  //       inBtRange: false,
+  //       isExpanded: false,
+  //     }));
+  //     setDoorsList(array);
+  //   });
+
+  //   console.log('Scanning bluetooth devices');
+  //   startScan();
+
+  //   const newDoorsList = getDoorsInRange(doorsList);
+
+  //   setDoorsList(newDoorsList);
+
+  //   return () => {
+  //     disableBTModule();
+  //   };
+  // }, [doorsList]);
 
   return (
     <SafeAreaView style={styles.container}>
