@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import BleManager from 'react-native-ble-manager';
 import { Door } from './DoorType';
-import { Peripheral } from './BtTypes';
+// import { Peripheral } from './BtTypes';
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
@@ -16,7 +16,7 @@ let isScanning = false;
 let UUIDsList: string[];
 let newDoorsList: Door[];
 
-const updateInBtRange = (UUID: string) => {
+const updateInBtRange = (UUID: string): boolean => {
   let deviceFound = false;
   UUIDsList.forEach((e) => {
     if (e === UUID) deviceFound = true;
@@ -24,7 +24,7 @@ const updateInBtRange = (UUID: string) => {
   return deviceFound;
 };
 
-const handleStopScan = () => {
+const handleStopScan = (): void => {
   console.log('Scan is stopped');
   isScanning = false;
   BleManager.getDiscoveredPeripherals().then((peripheralsArray) => {
@@ -42,7 +42,7 @@ const handleStopScan = () => {
   });
 };
 
-export const getDoorsInRange = (doorsList: Door[]) => {
+export const getDoorsInRange = (doorsList: Door[]): Door[] => {
   const array = [...doorsList];
   array.forEach((door: Door) => {
     if (updateInBtRange(door.uuid) === true) {
@@ -55,7 +55,7 @@ export const getDoorsInRange = (doorsList: Door[]) => {
   return newDoorsList;
 };
 
-export const initBTModule = () => {
+export const initBTModule = (): void => {
   BleManager.start({ showAlert: false }).then(() => {
     console.log('Module initialized');
   });
@@ -63,7 +63,7 @@ export const initBTModule = () => {
   bleManagerEmitter.addListener('BleManagerStopScan', handleStopScan);
 };
 
-export const checkPermissionAndroid = () => {
+export const checkPermissionAndroid = (): void => {
   if (Platform.OS === 'android' && Platform.Version >= 29) {
     PermissionsAndroid.check(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -107,7 +107,7 @@ export const checkPermissionAndroid = () => {
   }
 };
 
-export const startScan = () => {
+export const startScan = (): void => {
   if (!isScanning) {
     BleManager.scan([], 5, false)
       .then(() => {
@@ -120,7 +120,7 @@ export const startScan = () => {
   }
 };
 
-export const disableBTModule = () => {
+export const disableBTModule = (): void => {
   bleManagerEmitter.removeListener('BleManagerStopScan', handleStopScan);
   BleManager.stopScan();
 };

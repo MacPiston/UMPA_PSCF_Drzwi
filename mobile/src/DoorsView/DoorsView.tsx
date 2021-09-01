@@ -93,16 +93,16 @@ const DoorsView: React.FC = () => {
     console.log('Scanning bluetooth devices');
     startScan();
 
-    const newDoorsList = getDoorsInRange(doorsList);
-
-    console.log('new doorslist'.concat(newDoorsList.toString()));
-
-    setDoorsList(newDoorsList);
-
     return () => {
       disableBTModule();
     };
   }, []);
+
+  useEffect(() => {
+    // const newDoorsList = getDoorsInRange(doorsList); //wywala undefined
+    // console.log('new doorslist'.concat(newDoorsList.toString()));
+    // setDoorsList(newDoorsList);
+  }, [doorsList]);
 
   // useEffect(() => {
   //   console.log('new doorslist'.concat(doorsList));
