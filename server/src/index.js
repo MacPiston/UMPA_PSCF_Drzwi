@@ -392,18 +392,18 @@ io.on('connection', (socket) => {
 
     socket.on("openDoor", (data) => {
         console.log("opening doors with id: " + data.doorId);
-        socket.emit("openLock", {doorId: data.doorId});
+        //socket.emit("openLock", {uuid: data.doorId});
+        socket.broadcast.emit("openLock", {uuid: data.doorId});
     });
 
     socket.on("closeDoor", (data) => {
         console.log("closing doors with id: " + data.doorId);
-        socket.emit("closeLock", {doorId: data.doorId});
+        socket.broadcast.emit("closeLock", {uuid: data.doorId});
     });
 
     socket.on("quickOpenDoor", (data) => {
         console.log("opening doors for 10 seconds with id: " + data.doorId);
-        socket.emit("quickOpenLock", {doorId: data.doorId});
-
+        socket.broadcast.emit("quickOpenLock", {uuid: data.doorId});
     });
 
     socket.on("openLockResponse", (data) => {
