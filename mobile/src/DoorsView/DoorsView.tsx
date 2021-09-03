@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect } from 'react';
 import {
   SafeAreaView,
   LayoutAnimation,
@@ -10,20 +10,15 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { useNavigation, useRoute } from '@react-navigation/core';
+import { useNavigation } from '@react-navigation/core';
 import BleManager from 'react-native-ble-manager';
 import { styles } from './Stylesheets/Stylesheets';
 import ExpandableItem from './ExpandableItem';
 import { Door } from './DoorType';
-import { DoorsScreenRouteProp, MainStackParams } from '../Navigation/Params';
-import { SocketContext } from '../SocketIO/socket.provider';
-import {
-  initBTModule,
-  checkPermissionAndroid,
-  startScan,
-  disableBTModule,
-  getDoorsInRange,
-} from './BTManager';
+import { MainStackParams } from '../Navigation/Params';
+import useBTManager from './BTManager';
+import useSocketManager from './SocketManager';
+import useSocketEmitter from './SocketEmitter';
 
 type doorsScreenProp = StackNavigationProp<MainStackParams, 'Doors'>;
 
@@ -32,18 +27,16 @@ interface DataType {
 }
 
 const DoorsView: React.FC = () => {
-  const [doorsList, setDoorsList] = useState<Door[]>([]);
+  // const [doorsList, setDoorsList] = useState<Door[]>([]);
+  const { doorsInRangeList, disableBTModule } = useBTManager();
+  const { doorsList, setDoorsList, disconnectSocket } = useSocketManager();
+  const { refreshdoorsList, lockLongOpen, lockQuickOpen } = useSocketEmitter();
   const navigation = useNavigation<doorsScreenProp>();
-  const { params } = useRoute<DoorsScreenRouteProp>();
-  const { email } = params;
-  const { socket } = useContext(SocketContext);
-
-  const refreshdoorsList = () => {
-    socket.emit('doorsList', { email });
-  };
+  // const { socket } = useContext(SocketContext);
 
   const logOut = () => {
-    socket.disconnect();
+    disconnectSocket();
+    disableBTModule();
     navigation.navigate('Login');
   };
 
@@ -59,14 +52,6 @@ const DoorsView: React.FC = () => {
     setDoorsList(array);
   };
 
-  const lockLongOpen = (doorId: string) => {
-    socket.emit('openDoor', { doorId });
-  };
-
-  const lockQuickOpen = (doorId: string) => {
-    socket.emit('quickOpenDoor', { doorId });
-  };
-
   useEffect(() => {
     refreshdoorsList();
     BleManager.enableBluetooth()
@@ -74,24 +59,24 @@ const DoorsView: React.FC = () => {
       .catch(() => {
         logOut();
       });
-    checkPermissionAndroid();
+    // checkPermissionAndroid();
 
-    initBTModule();
+    // initBTModule();
 
-    socket.on('doors', (data: DataType) => {
-      const array = data.doorsList.map((item) => ({
-        lockID: item.lockID,
-        doorName: item.doorName,
-        uuid: item.uuid,
-        isOpen: item.isOpen,
-        inBtRange: false,
-        isExpanded: false,
-      }));
-      setDoorsList(array);
-    });
+    // socket.on('doors', (data: DataType) => {
+    //   const array = data.doorsList.map((item) => ({
+    //     lockID: item.lockID,
+    //     doorName: item.doorName,
+    //     uuid: item.uuid,
+    //     isOpen: item.isOpen,
+    //     inBtRange: false,
+    //     isExpanded: false,
+    //   }));
+    //   setDoorsList(array);
+    // });
 
     console.log('Scanning bluetooth devices');
-    startScan();
+    // startScan();
 
     return () => {
       disableBTModule();
