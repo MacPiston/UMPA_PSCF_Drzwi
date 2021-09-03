@@ -14,7 +14,6 @@ import { useNavigation } from '@react-navigation/core';
 import BleManager from 'react-native-ble-manager';
 import { styles } from './Stylesheets/Stylesheets';
 import ExpandableItem from './ExpandableItem';
-import { Door } from './DoorType';
 import { MainStackParams } from '../Navigation/Params';
 import useBTManager from './BTManager';
 import useSocketManager from './SocketManager';
@@ -22,13 +21,9 @@ import useSocketEmitter from './SocketEmitter';
 
 type doorsScreenProp = StackNavigationProp<MainStackParams, 'Doors'>;
 
-interface DataType {
-  doorsList: Door[];
-}
-
 const DoorsView: React.FC = () => {
   // const [doorsList, setDoorsList] = useState<Door[]>([]);
-  const { doorsInRangeList, disableBTModule } = useBTManager();
+  const { doorsInRangeList, disableBTModule, initBTModule } = useBTManager();
   const { doorsList, setDoorsList, disconnectSocket } = useSocketManager();
   const { refreshdoorsList, lockLongOpen, lockQuickOpen } = useSocketEmitter();
   const navigation = useNavigation<doorsScreenProp>();
@@ -59,25 +54,6 @@ const DoorsView: React.FC = () => {
       .catch(() => {
         logOut();
       });
-    // checkPermissionAndroid();
-
-    // initBTModule();
-
-    // socket.on('doors', (data: DataType) => {
-    //   const array = data.doorsList.map((item) => ({
-    //     lockID: item.lockID,
-    //     doorName: item.doorName,
-    //     uuid: item.uuid,
-    //     isOpen: item.isOpen,
-    //     inBtRange: false,
-    //     isExpanded: false,
-    //   }));
-    //   setDoorsList(array);
-    // });
-
-    console.log('Scanning bluetooth devices');
-    // startScan();
-
     return () => {
       disableBTModule();
     };

@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   NativeModules,
   NativeEventEmitter,
@@ -8,20 +8,17 @@ import {
 } from 'react-native';
 import BleManager from 'react-native-ble-manager';
 import { Door } from './DoorType';
-// import { Peripheral } from './BtTypes';
 
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
 const useBTManager = () => {
   let isScanning = false;
-  let UUIDsList: string[];
-  const [doorsInRangeList, setDoorsInRangeList] = useState<
-    (string[] | undefined)[]
-  >();
+  const [UUIDsList, setUUIDsList] = useState<(string[] | undefined)[]>([]);
+  const [doorsInRangeList, setDoorsInRangeList] = useState<Door[]>();
   // let newDoorsList: Door[];
 
-  const updateInBtRange = (UUID: string): boolean => {
+  const updateInBtRange = (UUID: string[] | undefined): boolean => {
     let deviceFound = false;
     UUIDsList.forEach((e) => {
       if (e === UUID) deviceFound = true;
@@ -34,12 +31,11 @@ const useBTManager = () => {
     isScanning = false;
     const peripheralsArray = await BleManager.getDiscoveredPeripherals();
     const newArray = peripheralsArray.map((el) => el.advertising.serviceUUIDs);
-    setDoorsInRangeList(newArray);
+    setUUIDsList(newArray);
   };
 
-  const getDoorsInRange = (doorsList: Door[]): Door[] => {
+  const getDoorsInRange = (doorsList: Door[]): void => {
     // const response = await handleStopScan();
-
     const array = [...doorsList];
     array.forEach((door: Door) => {
       if (updateInBtRange(door.uuid) === true) {
@@ -48,7 +44,7 @@ const useBTManager = () => {
         door.inBtRange = false;
       }
     });
-    return array;
+    setDoorsInRangeList(array);
   };
 
   const initBTModule = (): void => {
@@ -121,9 +117,17 @@ const useBTManager = () => {
     BleManager.stopScan();
   };
 
+  useEffect(() => {
+    // initBTModule();
+    // checkPermissionAndroid();
+    console.log('Scanning bluetooth devices');
+    // startScan();
+  });
+
   return {
     doorsInRangeList,
     disableBTModule,
+    initBTModule,
   };
 };
 

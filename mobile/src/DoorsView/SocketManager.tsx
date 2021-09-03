@@ -8,8 +8,6 @@ interface DataType {
 
 const useSocketManager = () => {
   const [doorsList, setDoorsList] = useState<Door[]>([]);
-  //   const { params } = useRoute<DoorsScreenRouteProp>();
-  //   const { email } = params;
   const { socket } = useContext(SocketContext);
 
   const disconnectSocket = () => {

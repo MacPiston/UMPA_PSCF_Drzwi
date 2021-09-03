@@ -4,7 +4,6 @@ import { DoorsScreenRouteProp } from '../Navigation/Params';
 import { SocketContext } from '../SocketIO/socket.provider';
 
 const useSocketEmitter = () => {
-  //   const [doorsList, setDoorsList] = useState<Door[]>([]);
   const { params } = useRoute<DoorsScreenRouteProp>();
   const { email } = params;
   const { socket } = useContext(SocketContext);
