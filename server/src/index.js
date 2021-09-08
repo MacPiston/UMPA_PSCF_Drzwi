@@ -470,6 +470,8 @@ io.on("connection", (socket) => {
           "Successfully updated door with lock ID: " + data.oldLockID
         );
       }
+    });
+  });
 
   socket.on("editEmail", (data) => {
     console.log("editing email");
