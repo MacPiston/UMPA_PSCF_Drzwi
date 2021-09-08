@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Door } from './DoorType';
 import { SocketContext } from '../SocketIO/socket.provider';
 
@@ -6,7 +6,11 @@ interface DataType {
   doorsList: Door[];
 }
 
-const useSocketManager = () => {
+const useSocketManager = (): {
+  doorsList: Door[];
+  setDoorsList: React.Dispatch<React.SetStateAction<Door[]>>;
+  disconnectSocket: () => void;
+} => {
   const [doorsList, setDoorsList] = useState<Door[]>([]);
   const { socket } = useContext(SocketContext);
 
@@ -26,7 +30,7 @@ const useSocketManager = () => {
       }));
       setDoorsList(array);
     });
-  });
+  }, []);
 
   return {
     doorsList,

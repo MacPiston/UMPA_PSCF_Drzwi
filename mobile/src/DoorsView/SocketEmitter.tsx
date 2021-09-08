@@ -3,12 +3,16 @@ import { useRoute } from '@react-navigation/core';
 import { DoorsScreenRouteProp } from '../Navigation/Params';
 import { SocketContext } from '../SocketIO/socket.provider';
 
-const useSocketEmitter = () => {
+const useSocketEmitter = (): {
+  refreshDoorsList: () => void;
+  lockLongOpen: (doorId: string) => void;
+  lockQuickOpen: (doorId: string) => void;
+} => {
   const { params } = useRoute<DoorsScreenRouteProp>();
   const { email } = params;
   const { socket } = useContext(SocketContext);
 
-  const refreshdoorsList = () => {
+  const refreshDoorsList = () => {
     socket.emit('doorsList', { email });
   };
 
@@ -21,7 +25,7 @@ const useSocketEmitter = () => {
   };
 
   return {
-    refreshdoorsList,
+    refreshDoorsList,
     lockLongOpen,
     lockQuickOpen,
   };

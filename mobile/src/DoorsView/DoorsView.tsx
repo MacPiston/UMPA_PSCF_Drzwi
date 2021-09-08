@@ -22,12 +22,20 @@ import useSocketEmitter from './SocketEmitter';
 type doorsScreenProp = StackNavigationProp<MainStackParams, 'Doors'>;
 
 const DoorsView: React.FC = () => {
-  // const [doorsList, setDoorsList] = useState<Door[]>([]);
-  const { doorsInRangeList, disableBTModule, initBTModule } = useBTManager();
+  const {
+    UUIDsList,
+    startScan,
+    disableBTModule,
+    getDoorsInRange,
+  } = useBTManager();
   const { doorsList, setDoorsList, disconnectSocket } = useSocketManager();
-  const { refreshdoorsList, lockLongOpen, lockQuickOpen } = useSocketEmitter();
+  const { refreshDoorsList, lockLongOpen, lockQuickOpen } = useSocketEmitter();
   const navigation = useNavigation<doorsScreenProp>();
-  // const { socket } = useContext(SocketContext);
+
+  const refreshDoors = () => {
+    refreshDoorsList();
+    startScan();
+  };
 
   const logOut = () => {
     disconnectSocket();
@@ -48,7 +56,7 @@ const DoorsView: React.FC = () => {
   };
 
   useEffect(() => {
-    refreshdoorsList();
+    refreshDoorsList();
     BleManager.enableBluetooth()
       .then()
       .catch(() => {
@@ -60,39 +68,9 @@ const DoorsView: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // const newDoorsList = getDoorsInRange(doorsList); //wywala undefined
-    // console.log('new doorslist'.concat(newDoorsList.toString()));
-    // setDoorsList(newDoorsList);
-  }, [doorsList]);
-
-  // useEffect(() => {
-  //   console.log('new doorslist'.concat(doorsList));
-  // }, [doorsList]);
-
-  // useEffect(() => {
-  //   socket.on('doors', (data: DataType) => {
-  //     const array = data.doorsList.map((item) => ({
-  //       lockID: item.lockID,
-  //       doorName: item.doorName,
-  //       uuid: item.uuid,
-  //       isOpen: item.isOpen,
-  //       inBtRange: false,
-  //       isExpanded: false,
-  //     }));
-  //     setDoorsList(array);
-  //   });
-
-  //   console.log('Scanning bluetooth devices');
-  //   startScan();
-
-  //   const newDoorsList = getDoorsInRange(doorsList);
-
-  //   setDoorsList(newDoorsList);
-
-  //   return () => {
-  //     disableBTModule();
-  //   };
-  // }, [doorsList]);
+    const newDoorsList = getDoorsInRange(doorsList);
+    setDoorsList(newDoorsList);
+  }, [UUIDsList]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -100,7 +78,6 @@ const DoorsView: React.FC = () => {
         <Pressable
           onPress={() => {
             logOut();
-            console.log('User is logged out');
           }}
         >
           <Icon name="log-out" style={styles.headerButton} />
@@ -108,7 +85,7 @@ const DoorsView: React.FC = () => {
         <Text style={styles.headerText}>Available doors</Text>
         <Pressable
           onPress={() => {
-            refreshdoorsList();
+            refreshDoors();
           }}
         >
           <Icon name="refresh-ccw" style={styles.headerButton} />

@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   NativeModules,
   NativeEventEmitter,
@@ -12,45 +12,64 @@ import { Door } from './DoorType';
 const BleManagerModule = NativeModules.BleManager;
 const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
 
-const useBTManager = () => {
-  let isScanning = false;
-  const [UUIDsList, setUUIDsList] = useState<(string[] | undefined)[]>([]);
+const useBTManager = (): {
+  UUIDsList: string[];
+  startScan: () => void;
+  disableBTModule: () => void;
+  getDoorsInRange: (doorsList: Door[]) => Door[];
+} => {
+  const [isScanning, setIsScanning] = useState<boolean>(false);
+  const [UUIDsList, setUUIDsList] = useState<string[]>([]);
   const [doorsInRangeList, setDoorsInRangeList] = useState<Door[]>();
-  // let newDoorsList: Door[];
+  let permissionGranted: boolean;
 
-  const updateInBtRange = (UUID: string[] | undefined): boolean => {
+  const updateInBtRange = (UUID: string): boolean => {
     let deviceFound = false;
     UUIDsList.forEach((e) => {
-      if (e === UUID) deviceFound = true;
+      if (UUID) {
+        if (e === UUID) {
+          deviceFound = true;
+        }
+      }
     });
     return deviceFound;
   };
 
-  const handleStopScan = async (): Promise<void> => {
-    console.log('Scan is stopped');
-    isScanning = false;
-    const peripheralsArray = await BleManager.getDiscoveredPeripherals();
-    const newArray = peripheralsArray.map((el) => el.advertising.serviceUUIDs);
-    setUUIDsList(newArray);
+  const filter = (el: BleManager.Peripheral): string => {
+    if (el.advertising.serviceUUIDs !== undefined) {
+      return el.advertising.serviceUUIDs[0];
+    }
+    return 'blank';
   };
 
-  const getDoorsInRange = (doorsList: Door[]): void => {
-    // const response = await handleStopScan();
-    const array = [...doorsList];
-    array.forEach((door: Door) => {
-      if (updateInBtRange(door.uuid) === true) {
-        door.inBtRange = true;
-      } else {
-        door.inBtRange = false;
-      }
-    });
-    setDoorsInRangeList(array);
+  const handleStopScan = async (): Promise<void> => {
+    setIsScanning(false);
+    const peripheralsArray = await BleManager.getDiscoveredPeripherals();
+    if (peripheralsArray !== undefined) {
+      const newArray = peripheralsArray
+        .filter((el) => el !== undefined)
+        .map((el) => filter(el));
+      setUUIDsList(newArray);
+    }
   };
+
+  const getDoorsInRange = useCallback(
+    (doorsList: Door[]): Door[] => {
+      doorsList.forEach((door: Door) => {
+        if (updateInBtRange(door.uuid) === true) {
+          door.inBtRange = true;
+        } else {
+          door.inBtRange = false;
+        }
+      });
+      setDoorsInRangeList(doorsList);
+      return doorsList;
+    },
+    [UUIDsList],
+  );
 
   const initBTModule = (): void => {
-    BleManager.start({ showAlert: false }).then(() => {
-      console.log('Module initialized');
-    });
+    BleManager.start({ showAlert: false });
 
     bleManagerEmitter.addListener('BleManagerStopScan', handleStopScan);
   };
@@ -61,15 +80,15 @@ const useBTManager = () => {
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
       ).then((result) => {
         if (result) {
-          console.log('Permission is OK (API >=29)');
+          permissionGranted = true;
         } else {
           PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           ).then((result2) => {
             if (result2) {
-              console.log('User accept');
+              permissionGranted = true;
             } else {
-              console.log('User refuse');
+              permissionGranted = false;
             }
           });
         }
@@ -83,15 +102,15 @@ const useBTManager = () => {
         PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
       ).then((result) => {
         if (result) {
-          console.log('Permission is OK (API < 23;28 >)');
+          permissionGranted = true;
         } else {
           PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
           ).then((result2) => {
             if (result2) {
-              console.log('User accept');
+              permissionGranted = true;
             } else {
-              console.log('User refuse');
+              permissionGranted = false;
             }
           });
         }
@@ -103,11 +122,10 @@ const useBTManager = () => {
     if (!isScanning) {
       BleManager.scan([], 3, false)
         .then(() => {
-          console.log('Scanning...');
-          isScanning = true;
+          if (permissionGranted) setIsScanning(true);
         })
-        .catch((err) => {
-          console.error(err);
+        .catch(() => {
+          setIsScanning(false);
         });
     }
   };
@@ -118,16 +136,16 @@ const useBTManager = () => {
   };
 
   useEffect(() => {
-    // initBTModule();
-    // checkPermissionAndroid();
-    console.log('Scanning bluetooth devices');
-    // startScan();
-  });
+    initBTModule();
+    checkPermissionAndroid();
+    startScan();
+  }, []);
 
   return {
-    doorsInRangeList,
+    UUIDsList,
+    startScan,
     disableBTModule,
-    initBTModule,
+    getDoorsInRange,
   };
 };
 
