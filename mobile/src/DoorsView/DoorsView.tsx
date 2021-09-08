@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useContext } from 'react';
+/* eslint-disable no-param-reassign */
+import React, { useEffect } from 'react';
 import {
   SafeAreaView,
   LayoutAnimation,
@@ -9,87 +10,99 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { useNavigation, useRoute } from '@react-navigation/core';
+import { useNavigation } from '@react-navigation/core';
+import BleManager from 'react-native-ble-manager';
 import { styles } from './Stylesheets/Stylesheets';
 import ExpandableItem from './ExpandableItem';
-import Door from './DoorType';
-import { DoorsScreenRouteProp, MainStackParams } from '../Navigation/Params';
-import { SocketContext } from '../SocketIO/socket.provider';
+import { MainStackParams } from '../Navigation/Params';
+import useBTManager from './BTManager';
+import useSocketManager from './SocketManager';
+import useSocketEmitter from './SocketEmitter';
 
 type doorsScreenProp = StackNavigationProp<MainStackParams, 'Doors'>;
 
 const DoorsView: React.FC = () => {
-  const [doorList, setDoorList] = useState<Door[]>([]);
+  const {
+    UUIDsList,
+    startScan,
+    disableBTModule,
+    getDoorsInRange,
+  } = useBTManager();
+  const { doorsList, setDoorsList, disconnectSocket } = useSocketManager();
+  const { refreshDoorsList, lockLongOpen, lockQuickOpen } = useSocketEmitter();
   const navigation = useNavigation<doorsScreenProp>();
-  const { params } = useRoute<DoorsScreenRouteProp>();
-  const { email } = params;
-  const { socket } = useContext(SocketContext);
 
-  const refreshDoorList = () => {
-    socket.emit('doorsList', { email });
+  const refreshDoors = () => {
+    refreshDoorsList();
+    startScan();
   };
-  useEffect(() => {
-    refreshDoorList();
-  }, []);
 
   const logOut = () => {
-    socket.disconnect();
+    disconnectSocket();
+    disableBTModule();
     navigation.navigate('Login');
   };
 
-  interface DataType {
-    doorsList: Door[];
-  }
-
-  socket.on('doors', (data: DataType) => {
-    const array = data.doorsList.map((item) => ({
-      doorName: item.doorName,
-      lockID: item.lockID,
-      inBtRange: false,
-      isExpanded: false,
-    }));
-    setDoorList(array);
-  });
-
   const updateLayout = (index: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    const array = [...doorList];
-    array.map((value, placeindex) =>
-      placeindex === index
-        ? (array[placeindex].isExpanded = !array[placeindex].isExpanded)
-        : (array[placeindex].isExpanded = false),
-    );
-    setDoorList(array);
+    const array = [...doorsList];
+    array.forEach((value, placeindex) => {
+      value.isExpanded =
+        placeindex === index
+          ? (array[placeindex].isExpanded = !array[placeindex].isExpanded)
+          : (array[placeindex].isExpanded = false);
+    });
+    setDoorsList(array);
   };
+
+  useEffect(() => {
+    refreshDoorsList();
+    BleManager.enableBluetooth()
+      .then()
+      .catch(() => {
+        logOut();
+      });
+    return () => {
+      disableBTModule();
+    };
+  }, []);
+
+  useEffect(() => {
+    const newDoorsList = getDoorsInRange(doorsList);
+    setDoorsList(newDoorsList);
+  }, [UUIDsList]);
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerRow}>
         <Pressable
           onPress={() => {
-            alert('Zostałeś wylogowany');
             logOut();
-            console.log('User is logged out');
           }}
         >
           <Icon name="log-out" style={styles.headerButton} />
         </Pressable>
-        <Text style={styles.headerText}>Dostępne drzwi</Text>
+        <Text style={styles.headerText}>Available doors</Text>
         <Pressable
           onPress={() => {
-            console.log('Available doors list has been refreshed');
-            refreshDoorList();
+            refreshDoors();
           }}
         >
           <Icon name="refresh-ccw" style={styles.headerButton} />
         </Pressable>
       </View>
       <ScrollView>
-        {doorList?.map((door, key) => (
+        {doorsList?.map((door, key) => (
           <ExpandableItem
-            key={door.doorName}
+            key={door.lockID}
             onPressFunction={() => {
               updateLayout(key);
+            }}
+            longOpenFunction={() => {
+              lockLongOpen(door.uuid);
+            }}
+            quickOpenFunction={() => {
+              lockQuickOpen(door.uuid);
             }}
             item={door}
           />

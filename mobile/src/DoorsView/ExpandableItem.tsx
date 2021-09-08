@@ -1,14 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { styles } from './Stylesheets/Stylesheets';
-import Door from './DoorType';
+import { Door } from './DoorType';
 
 interface ItemProps {
   item: Door;
   onPressFunction: () => void;
+  longOpenFunction: () => void;
+  quickOpenFunction: () => void;
 }
 
-const ExpandableItem = ({ item, onPressFunction }: ItemProps): JSX.Element => {
+const ExpandableItem = ({
+  item,
+  onPressFunction,
+  longOpenFunction,
+  quickOpenFunction,
+}: ItemProps): JSX.Element => {
   // Custom Component for the Expandable List
   const [layoutHeight, setLayoutHeight] = useState<number | undefined>(0);
 
@@ -24,6 +31,7 @@ const ExpandableItem = ({ item, onPressFunction }: ItemProps): JSX.Element => {
     <View>
       {/* Header of the Expandable List Item */}
       <TouchableOpacity
+        key={item.inBtRange.valueOf.toString()}
         activeOpacity={0.8}
         onPress={onPressFunction}
         style={[
@@ -45,11 +53,22 @@ const ExpandableItem = ({ item, onPressFunction }: ItemProps): JSX.Element => {
           style={styles.accordionListElement}
           onPress={() =>
             item.inBtRange
-              ? alert('Otwarto ' + item.doorName)
-              : alert(item.doorName + ' nie jest w zasięgu')
+              ? longOpenFunction()
+              : alert(item.doorName.concat(' is not in BT range'))
           }
         >
-          <Text style={styles.accordionListElementText}>Otwórz drzwi</Text>
+          <Text style={styles.accordionListElementText}>Open door</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={0.5}
+          style={styles.accordionListElement}
+          onPress={() =>
+            item.inBtRange
+              ? quickOpenFunction()
+              : alert(item.doorName.concat(' is not in BT range'))
+          }
+        >
+          <Text style={styles.accordionListElementText}>Open for 10s</Text>
         </TouchableOpacity>
       </View>
     </View>
