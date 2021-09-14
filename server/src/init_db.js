@@ -2,7 +2,7 @@ var mysql = require("mysql");
 var connection = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "password",
+  password: "root",
 });
 
 connection.connect();
@@ -62,7 +62,7 @@ connection.query(
 );
 
 connection.query(
-  'insert ignore into doors (lockID, door_name, uuid) values ("192.1.200.15", "serwerownia", "11111111111");',
+  'insert ignore into doors (lockID, door_name, uuid) values ("192.1.200.15", "serwerownia", "7eac3b3f-2010-4aef-ba74-548dbee10de3");',
   function (err) {
     if (err) throw err;
     console.log("door data #1 added");
@@ -78,7 +78,7 @@ connection.query(
 );
 
 connection.query(
-  'insert ignore into doors (lockID, door_name, uuid) values ("192.1.200.17", "pracownia 2", "33333333333");',
+  'insert ignore into doors (lockID, door_name, uuid) values ("192.1.200.17", "pracownia", "c6adffa1-e052-4daf-8ec2-4db864894336");',
   function (err) {
     if (err) throw err;
     console.log("door data #1 added");
@@ -86,7 +86,7 @@ connection.query(
 );
 
 connection.query(
-  'insert ignore into doors (lockID, door_name, uuid) values ("200.200.150.1", "pracownia", "22222222222");',
+  'insert ignore into doors (lockID, door_name, uuid) values ("200.200.150.1", "pracownia 2", "312f93bf-1672-470d-89e9-3ca2f658e80a");',
   function (err) {
     if (err) throw err;
     console.log("door data #2 added.");

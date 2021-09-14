@@ -166,6 +166,11 @@ export default function Main() {
         return false;
     }
 
+    function validateEmail(email) {
+        const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    }
+
     function addUser(email, password) {
         var newUser = new User(email, password);
         users.push(newUser);
@@ -229,6 +234,10 @@ export default function Main() {
 
         if(checkIfNewUserExists(email)) {
             alert("Użytkownik o podanym emailu już istnieje!");
+            return;
+        }
+        if (!validateEmail(email)) {
+            alert("Wprowadź poprawny email.");
             return;
         }
         socket.emit("addUser", {email: email, password: password});
