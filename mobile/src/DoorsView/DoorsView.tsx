@@ -7,6 +7,7 @@ import {
   Text,
   ScrollView,
   Pressable,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -29,7 +30,12 @@ const DoorsView: React.FC = () => {
     getDoorsInRange,
   } = useBTManager();
   const { doorsList, setDoorsList, disconnectSocket } = useSocketManager();
-  const { refreshDoorsList, lockLongOpen, lockQuickOpen } = useSocketEmitter();
+  const {
+    refreshDoorsList,
+    lockLongOpen,
+    lockQuickOpen,
+    lockClose,
+  } = useSocketEmitter();
   const navigation = useNavigation<doorsScreenProp>();
 
   const refreshDoors = () => {
@@ -57,11 +63,13 @@ const DoorsView: React.FC = () => {
 
   useEffect(() => {
     refreshDoorsList();
-    BleManager.enableBluetooth()
-      .then()
-      .catch(() => {
-        logOut();
-      });
+    if (Platform.OS === 'android') {
+      BleManager.enableBluetooth()
+        .then()
+        .catch(() => {
+          logOut();
+        });
+    }
     return () => {
       disableBTModule();
     };
@@ -103,6 +111,12 @@ const DoorsView: React.FC = () => {
             }}
             quickOpenFunction={() => {
               lockQuickOpen(door.uuid);
+            }}
+            closeFunction={() => {
+              lockClose(door.uuid);
+            }}
+            doorsListRefresh={() => {
+              refreshDoors();
             }}
             item={door}
           />
