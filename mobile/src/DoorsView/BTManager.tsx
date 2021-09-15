@@ -48,7 +48,7 @@ const useBTManager = (): {
     if (peripheralsArray !== undefined) {
       const newArray = peripheralsArray
         .filter((el) => el !== undefined)
-        .map((el) => filter(el));
+        .map((el) => filter(el).toLowerCase());
       setUUIDsList(newArray);
     }
   };
@@ -115,7 +115,7 @@ const useBTManager = (): {
           });
         }
       });
-    }
+    } else if (Platform.OS === 'ios') permissionGranted = true;
   };
 
   const startScan = (): void => {
