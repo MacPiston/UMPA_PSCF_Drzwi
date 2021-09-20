@@ -1,6 +1,8 @@
 const express = require("express");
 const socket = require("socket.io");
 const cors = require("cors");
+var config = require('./config.json');
+
 
 const app = express();
 app.use(cors());
@@ -52,8 +54,8 @@ var io = socket(server);
 var mysql = require("mysql");
 var connection = mysql.createConnection({
   host: "localhost",
-  user: "root",
-  password: "password",
+  user: config.username,
+  password: config.password,
   database: "door_access",
 });
 
