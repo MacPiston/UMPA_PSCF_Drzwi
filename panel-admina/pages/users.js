@@ -65,7 +65,7 @@ socket.on('fullDoorsListResponse', function(data) {
         doors.push(new DoorServer(door.lockID, door.doorName, door.uuid));
     }
     socket.emit('doorsList', {email: Main.userName});
-    
+
 });
 
 socket.on('doors', function(data){
@@ -190,7 +190,7 @@ export default function Main() {
 
     function editUser(email){
         currentEditUser(email);
-        
+
         togglePopup();
     }
 
@@ -201,14 +201,14 @@ export default function Main() {
 
     function executeEdit(email, password) {
         for(var user of users) {
-            if(user.email == userName) {
+            if(user.email === userName) {
                 if(password != "") {
                     user.password = password;
                     socket.emit("editPassword", {email: userName, newPassword: password});
                 } if(email != "") {
                     user.email = email;
                     socket.emit("editEmail", {oldEmail: userName, newEmail: email});
-                } 
+                }
             }
         }
         togglePopup();
@@ -271,7 +271,7 @@ export default function Main() {
             handleClose={togglePopup}
             handleEdit={executeEdit}/> }
 
-            {isOpenPermissionModal && <PermissionPopup 
+            {isOpenPermissionModal && <PermissionPopup
             user={userName}
             doorsList={doors}
             permissionList={permissions}
