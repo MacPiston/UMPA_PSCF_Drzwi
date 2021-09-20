@@ -82,6 +82,7 @@ function useForceUpdate() {
 }
 
 function UserTable(props) {
+    console.log(props.items);
     var index = 1;
     return (
         <div className={styles.table}>
@@ -151,6 +152,8 @@ export default function Main() {
     }
 
     socket.on('users', function(data) {
+        users = [];
+        console.log("Hello");
         for(const user of data) {
             users.push(new User(user.email, user.password));
         }
@@ -205,7 +208,7 @@ export default function Main() {
                 if(password != "") {
                     user.password = password;
                     socket.emit("editPassword", {email: userName, newPassword: password});
-                } if(email != "") {
+                } if(email != "" && validateEmail(email)) {
                     user.email = email;
                     socket.emit("editEmail", {oldEmail: userName, newEmail: email});
                 } 
@@ -220,6 +223,7 @@ export default function Main() {
     Main.editing = editUser;
     Main.permissions = editPermissions;
     Main.togglePermModal = togglePermissionsModal;
+    Main.refresh = refresh;
 
     function handleSubmitAdd(event) {
         event.preventDefault();
