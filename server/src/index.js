@@ -63,34 +63,6 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/public/index.html");
 });
 
-connection.connect(function (err) {
-  if (err) throw err;
-
-  connection.query("SELECT * from users", function (error, results, fields) {
-    if (error) throw error;
-
-    for (const row of results) {
-      users.push(new User(row.email, row.password));
-    }
-
-    io.on("connection", (socket) => {
-      socket.on("requestUsers", function () {
-        console.log("users requested");
-        socket.emit("users", users);
-      });
-    });
-  });
-
-  connection.query("SELECT * from doors", function (error, results, fields) {
-    if (error) throw error;
-    for (const row of results) {
-      doors.push(
-        new DoorServer(row.lockID, row.door_name, row.uuid, row.isOpen)
-      );
-    }
-  });
-});
-
 io.on("connection", (socket) => {
   console.log("connection");
 
@@ -158,6 +130,19 @@ io.on("connection", (socket) => {
         );
         socket.emit("loginRequestRes", false);
       }
+    });
+  });
+
+  socket.on("requestUsers", function () {
+    users=[];
+    connection.query("SELECT * from users", function (error, results, fields) {
+      if (error) throw error;
+      for (const row of results) {
+        users.push(new User(row.email, row.password));
+      }
+      console.log(users)
+      console.log("users requested");
+      socket.emit("users", users);
     });
   });
 
